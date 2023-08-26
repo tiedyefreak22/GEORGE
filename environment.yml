@@ -1,0 +1,11 @@
+name: base
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.10
+  - mamba==1.4.2
+  - conda==23.1.0
+  - pip
+  - miniforge_console_shortcut=1
+prefix: C:\ProgramData\mambaforge
