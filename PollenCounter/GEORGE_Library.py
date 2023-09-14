@@ -47,6 +47,12 @@ from keras.utils import to_categorical
 import warnings
 from matplotlib import cm
 
+global IMAGE_PATH
+global IMAGE_WIDTH
+global IMAGE_HEIGHT
+global IMAGE_CHANNELS
+global category_index
+
 IMAGE_PATH = 'Yang Model Training/bee_imgs/bee_imgs/'
 IMAGE_WIDTH = 75
 IMAGE_HEIGHT = 150
@@ -249,31 +255,19 @@ def unison_shuffle(arr1, arr2):
     p = np.random.permutation(len(arr1))
     return np.array(arr1)[p], np.array(arr2)[p]
 
-# def augment_set(dataset, training = True, num_images = None, set_name = None, ex_sub = True):
-#     if num_images == None:
-#         num_images = len(dataset)
-#     train_images_np = [0] * num_images
-#     gt_boxes = [0] * num_images
-#     train_labels = [0] * num_images
-#     subset = dataset.shuffle(len(dataset)).take(num_images)
-#     with tqdm(total=num_images, desc=str(set_name), unit="images") as pbar:
-#         for i in range(num_images):
-#             new_image, label = next(iter(subset))
-#             train_labels[i] = get_label(label)
-#             new_image = zoom_image(new_image)
-#             if ex_sub:
-#                 new_image = extract_sub(np.array(new_image))
-#             new_image, new_coords = process_image(new_image)
-#             train_images_np[i] = np.array(new_image)
-#             if training:
-#                 gt_boxes[i] = np.array([new_coords], dtype=np.float32)
-#             pbar.update(1)
-#     if training:
-#         print('Succeeded for ' + str(len(train_images_np)) + ' of ' + str(num_images), flush=True)
-#         return train_images_np, gt_boxes, train_labels
-#     else:
-#         print('Succeeded for ' + str(len(train_images_np)) + ' of ' + str(num_images), flush=True)
-#         return train_images_np
+# Automatic brightness and contrast optimization with optional histogram clipping
+def automatic_brightness_and_contrast(image):
+    alow = image.min()
+    ahigh = image.max()
+    amax = 255
+    amin = 0
+
+    # calculate alpha, beta
+    alpha = ((amax - amin) / (ahigh - alow))
+    beta = amin - alow * alpha
+    # perform the operation g(x,y)= α * f(x,y)+ β
+    auto_result = cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
+    return (np.array(auto_result).astype('uint8'))#, alpha, beta)
         
 def augment_npset(dataset, opt_labels, training = True, num_images = None, set_name = None, ex_sub = True):
     assert(len(dataset) == len(opt_labels))
@@ -288,6 +282,7 @@ def augment_npset(dataset, opt_labels, training = True, num_images = None, set_n
             new_image = subset[i]
             label = new_labels[i]
             train_labels[i] = get_label(label)
+            new_image = automatic_brightness_and_contrast(new_image)
             new_image = zoom_image(new_image)
             if ex_sub:
                 new_image = extract_sub(np.array(new_image))
@@ -429,50 +424,3 @@ def PD_dataset(file_list,size=(300,180),flattened=False):
     #labels = [print(f.split("images")[-1][1]) for f in file_list]
 
     return np.array(data), np.array(labels)
-
-# Automatic brightness and contrast optimization with optional histogram clipping
-def automatic_brightness_and_contrast(image, CLIP_HIST_PERCENTAGE):
-    img_float32 = np.float32(image)
-    lab_image = cv.cvtColor(img_float32, cv.COLOR_RGB2HSV)
-    gray = cv2.cvtColor(lab_image, cv2.COLOR_BGR2GRAY)
-    
-    # Calculate grayscale histogram
-    hist = cv2.calcHist([gray],[0],None,[256],[0,256])
-    hist_size = len(hist)
-    
-    # Calculate cumulative distribution from the histogram
-    accumulator = []
-    accumulator.append(float(hist[0]))
-    for index in range(1, hist_size):
-        accumulator.append(accumulator[index -1] + float(hist[index]))
-    
-    # Locate points to clip
-    maximum = accumulator[-1]
-    clip_hist_percent *= (maximum/100.0)
-    clip_hist_percent /= 2.0
-    
-    # Locate left cut
-    minimum_gray = 0
-    while accumulator[minimum_gray] < clip_hist_percent:
-        minimum_gray += 1
-    
-    # Locate right cut
-    maximum_gray = hist_size -1
-    while accumulator[maximum_gray] >= (maximum - clip_hist_percent):
-        maximum_gray -= 1
-    
-    # Calculate alpha and beta values
-    alpha = 255 / (maximum_gray - minimum_gray)
-    beta = -minimum_gray * alpha
-    
-    '''
-    # Calculate new histogram with desired range and show histogram 
-    new_hist = cv2.calcHist([gray],[0],None,[256],[minimum_gray,maximum_gray])
-    plt.plot(hist)
-    plt.plot(new_hist)
-    plt.xlim([0,256])
-    plt.show()
-    '''
-
-    auto_result = cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
-    return (auto_result, alpha, beta)
