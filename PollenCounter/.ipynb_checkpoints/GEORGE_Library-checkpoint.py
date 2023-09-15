@@ -410,17 +410,14 @@ def test_accuracy_report(model):
     test_res = model.evaluate(X_test, y_test.values, verbose=0)
     print('Loss function: %s, accuracy:' % test_res[0], test_res[1])
 
-def PD_dataset(file_list,size=(300,180),flattened=False):
+def PD_dataset(file_list, size=(IMAGE_HEIGHT, IMAGE_WIDTH), flattened=False):
     data = []
     for i, file in enumerate(file_list):
         image = io.imread(file)
         image = transform.resize(image, size, mode='constant')
         if flattened:
             image = image.flatten()
-
         data.append(image)
-
     labels = [1 if f.split("images")[-1][1] == 'P' else 0 for f in file_list]
-    #labels = [print(f.split("images")[-1][1]) for f in file_list]
 
-    return np.array(data), np.array(labels)
+    return np.array(data).astype('uint8'), np.array(labels)
