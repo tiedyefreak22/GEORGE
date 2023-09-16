@@ -417,7 +417,7 @@ def PD_dataset(file_list, size=(IMAGE_HEIGHT, IMAGE_WIDTH), flattened=False):
         image = transform.resize(image, size, mode='constant')
         if flattened:
             image = image.flatten()
-        data.append(image)
+        data.append(image * 255)
     labels = [1 if f.split("images")[-1][1] == 'P' else 0 for f in file_list]
 
     return np.array(data).astype('uint8'), np.array(labels)
