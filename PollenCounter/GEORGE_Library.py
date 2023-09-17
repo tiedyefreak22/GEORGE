@@ -357,7 +357,7 @@ def draw_group(dataset, var, title,height=500):
     
 def read_image(file_name):
     image = skimage.io.imread(IMAGE_PATH + file_name)
-    image = skimage.transform.resize(image, (IMAGE_WIDTH, IMAGE_HEIGHT), mode='reflect')
+    image = skimage.transform.resize(image, (IMAGE_HEIGHT, IMAGE_WIDTH), mode='reflect')
     return image[:,:,:IMAGE_CHANNELS]
 
 def categories_encoder(dataset, var='subspecies'):
