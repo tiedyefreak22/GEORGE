@@ -1,22 +1,22 @@
 import os
 import pathlib
 import matplotlib
+from matplotlib import cm
 import matplotlib.pyplot as plt
-import os
 import random
 import io
 import imageio
 import glob
-import imutils
+#import imutils
 import cv2
-import scipy
+#import scipy
 import numpy as np
 from six import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 from IPython.display import display, Javascript
 from IPython.display import Image as IPyImage
 from tqdm import tqdm
-import time
+#import time
 import math
 import tensorflow as tf
 import tensorflow_datasets as tfds
@@ -31,7 +31,7 @@ import skimage
 import skimage.io
 import skimage.transform
 from skimage import io, transform
-import seaborn as sns
+#import seaborn as sns
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
 from plotly import tools
@@ -45,7 +45,6 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import ModelCheckpoint, Callback, EarlyStopping, ReduceLROnPlateau, LearningRateScheduler
 from keras.utils import to_categorical
 import warnings
-from matplotlib import cm
 
 global IMAGE_PATH
 global IMAGE_WIDTH
