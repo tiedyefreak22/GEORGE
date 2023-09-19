@@ -117,7 +117,7 @@ def plot_detections(image_np,
 
 def get_label(label):
     trans_label = []
-    for j in range(len(label)):
+    for j in range(len(label) + 1):
         trans_label.append(label[j-1]*j)
     trans_label = np.array(int(np.sum(trans_label)))
     return list(category_index.values())[trans_label], tf.one_hot(trans_label, 5), [trans_label + 1]
@@ -250,10 +250,17 @@ def process_image(new_image):
 
     return new_image, coords
 
+# def unison_shuffle(arr1, arr2):
+#     assert len(arr1) == len(arr2)
+#     p = np.random.permutation(len(arr1))
+#     return np.array(arr1)[p], np.array(arr2)[p]
+
 def unison_shuffle(arr1, arr2):
     assert len(arr1) == len(arr2)
     p = np.random.permutation(len(arr1))
-    return np.array(arr1)[p], np.array(arr2)[p]
+    new_arr1 = [arr1[i] for i in p]
+    new_arr2 = [arr2[j] for j in p]
+    return new_arr1, new_arr2
 
 # Automatic brightness and contrast optimization with optional histogram clipping
 def automatic_brightness_and_contrast(image):
@@ -276,7 +283,9 @@ def augment_npset(dataset, opt_labels, training = True, num_images = None, set_n
     train_images_np = [0] * num_images
     gt_boxes = [0] * num_images
     train_labels = [0] * num_images
-    subset, new_labels = unison_shuffle(np.array(dataset), opt_labels)
+    #subset, new_labels = unison_shuffle(dataset, opt_labels)
+    subset = dataset
+    new_labels = opt_labels
     with tqdm(total=num_images, desc=str(set_name), unit="images") as pbar:
         for i in range(num_images):
             new_image = subset[i]
