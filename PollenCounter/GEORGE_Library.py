@@ -249,11 +249,6 @@ def process_image(new_image):
 
     return new_image, coords
 
-# def unison_shuffle(arr1, arr2):
-#     assert len(arr1) == len(arr2)
-#     p = np.random.permutation(len(arr1))
-#     return np.array(arr1)[p], np.array(arr2)[p]
-
 def unison_shuffle(arr1, arr2):
     assert len(arr1) == len(arr2)
     p = np.random.permutation(len(arr1))
