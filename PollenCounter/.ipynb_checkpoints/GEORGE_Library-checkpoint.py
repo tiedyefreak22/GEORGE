@@ -57,6 +57,7 @@ IMAGE_WIDTH = 75
 IMAGE_HEIGHT = 150
 IMAGE_CHANNELS = 3
 category_index = {1: {'id': 1, 'name': 'regular'}, 2: {'id': 2, 'name': 'cooling'}, 3: {'id': 3, 'name': 'pollen'}, 4: {'id': 4, 'name': 'varroa'}, 5: {'id': 5, 'name': 'wasps'}}
+batch_size = 64
 
 
 def load_image_into_numpy_array(path):
@@ -233,6 +234,8 @@ def process_image(new_image):
     new_image = new_image.rotate(rotation_range, Image.BILINEAR, expand = 1)
     h = np.shape(new_image)[0]
     w = np.shape(new_image)[1]
+    if h > 640 or w > 640:
+        print(h, w)
     coords = [0, 0, h, w]
     
     x_offset = tf.random.uniform((), 0 , tf.cast(640-w, tf.int32), dtype=tf.int32)
@@ -248,11 +251,6 @@ def process_image(new_image):
     coords = np.array([(i / 640) for i in coords])
 
     return new_image, coords
-
-# def unison_shuffle(arr1, arr2):
-#     assert len(arr1) == len(arr2)
-#     p = np.random.permutation(len(arr1))
-#     return np.array(arr1)[p], np.array(arr2)[p]
 
 def unison_shuffle(arr1, arr2):
     assert len(arr1) == len(arr2)
@@ -429,3 +427,95 @@ def PD_dataset(file_list, size=(IMAGE_HEIGHT, IMAGE_WIDTH), flattened=False):
     labels = [1 if f.split("images")[-1][1] == 'P' else 0 for f in file_list]
 
     return np.array(data).astype('uint8'), np.array(labels)
+
+def get_file_and_info(filename):
+    temp_label = np.zeros(5)
+    temp_label[int(filename.split('\\')[1][0]) - 1] = 1
+    label = get_label(temp_label[1:len(temp_label)])
+    temp_gt_box = (filename.split('\\')[1]).split('_')
+    gt_box = np.array([[float('0.' + temp_gt_box[0][1:len(temp_gt_box[0])]),
+                        float('0.' + temp_gt_box[1]),
+                        float('0.' + temp_gt_box[2]),
+                        float('0.' + temp_gt_box[3].split('.')[0])]]).astype('float32')
+    image = np.array(Image.open(filename).convert('RGB')).astype('uint8')
+    return image, label, gt_box
+
+def prep_train_imgs(train_images_np, train_labels, gt_boxes):
+    # By convention, our non-background classes start counting at 1.
+    num_classes = 5
+
+    # Convert class labels to one-hot; convert everything to tensors.
+    train_image_tensors = []
+    gt_classes_one_hot_tensors = []
+    gt_box_tensors = []
+    item_num = np.shape(train_images_np)[0]
+
+    for (train_image_np, gt_box_np, train_label) in zip(train_images_np, gt_boxes, train_labels):
+        train_image_tensors.append(tf.expand_dims(tf.convert_to_tensor(train_image_np, dtype=tf.float32), axis=0))
+        gt_box_tensors.append(tf.convert_to_tensor(gt_box_np, dtype=tf.float32))
+        gt_classes_one_hot_tensors.append([train_label[1]])
+    gt_classes_one_hot_tensors = np.array(gt_classes_one_hot_tensors)
+    return train_image_tensors, gt_box_tensors, gt_classes_one_hot_tensors
+
+# Set up forward + backward pass for a single train step.
+def get_model_train_step_function(model, optimizer, vars_to_fine_tune):
+    """Get a tf.function for training step."""
+
+    # Use tf.function for a bit of speed.
+    # Comment out the tf.function decorator if you want the inside of the
+    # function to run eagerly.
+    @tf.function
+    def train_step_fn(image_tensors,
+                    groundtruth_boxes_list,
+                    groundtruth_classes_list):
+        """A single training iteration.
+
+        Args:
+          image_tensors: A list of [1, height, width, 3] Tensor of type tf.float32.
+            Note that the height and width can vary across images, as they are
+            reshaped within this function to be 640x640.
+          groundtruth_boxes_list: A list of Tensors of shape [N_i, 4] with type
+            tf.float32 representing groundtruth boxes for each image in the batch.
+          groundtruth_classes_list: A list of Tensors of shape [N_i, num_classes]
+            with type tf.float32 representing groundtruth boxes for each image in
+            the batch.
+
+        Returns:
+          A scalar tensor representing the total loss for the input batch.
+        """
+        shapes = tf.constant(batch_size * [[640, 640, 3]], dtype=tf.int32)
+        model.provide_groundtruth(
+            groundtruth_boxes_list=groundtruth_boxes_list,
+            groundtruth_classes_list=groundtruth_classes_list)
+        with tf.GradientTape() as tape:
+            preprocessed_images = tf.concat(
+                #[detection_model.preprocess(image_tensor)[0]
+                [model.preprocess(image_tensor)[0]
+                for image_tensor in image_tensors], axis=0)
+            prediction_dict = model.predict(preprocessed_images, shapes)
+            losses_dict = model.loss(prediction_dict, shapes)
+            global total_loss
+            total_loss = losses_dict['Loss/localization_loss'] + losses_dict['Loss/classification_loss']
+            gradients = tape.gradient(total_loss, vars_to_fine_tune)
+            optimizer.apply_gradients(zip(gradients, vars_to_fine_tune))
+        return total_loss
+
+    return train_step_fn
+
+#@tf.function
+def detect(input_tensor):
+    """Run detection on an input image.
+
+    Args:
+    input_tensor: A [1, height, width, 3] Tensor of type tf.float32.
+      Note that height and width can be anything since the image will be
+      immediately resized according to the needs of the model within this
+      function.
+
+    Returns:
+    A dict containing 3 Tensors (`detection_boxes`, `detection_classes`,
+      and `detection_scores`).
+    """
+    preprocessed_image, shapes = detection_model.preprocess(input_tensor)
+    prediction_dict = detection_model.predict(preprocessed_image, shapes)
+    return detection_model.postprocess(prediction_dict, shapes)
