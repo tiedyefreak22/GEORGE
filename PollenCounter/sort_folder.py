@@ -12,7 +12,7 @@
 """
 
 import argparse
-import Tkinter as tk
+import tkinter as tk
 import os
 from shutil import copyfile, move
 from PIL import ImageTk, Image
@@ -134,8 +134,10 @@ class ImageGui:
         :return: Resized image
         """
         image = Image.open(path)
-        image = image.resize(size, Image.ANTIALIAS)
-        return image
+        image = image.resize(size, Image.Resampling.LANCZOS)
+        image = GEORGE.automatic_brightness_and_contrast(image)
+        
+        return Image.fromarray(image)
 
     @staticmethod
     def _copy_image(input_path, label):
@@ -147,7 +149,7 @@ class ImageGui:
         """
         root, file_name = os.path.split(input_path)
         output_path = os.path.join(root, label, file_name)
-        print " %s --> %s" % (file_name, label)
+        print(" %s --> %s" % (file_name, label))
         copyfile(input_path, output_path)
 
     @staticmethod
@@ -161,7 +163,7 @@ class ImageGui:
         """
         root, file_name = os.path.split(input_path)
         output_path = os.path.join(root, label, file_name)
-        print " %s --> %s" % (file_name, label)
+        print(" %s --> %s" % (file_name, label))
         move(input_path, output_path)
 
 
@@ -178,7 +180,7 @@ if __name__ == "__main__":
 
     # Make input arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f', '--folder', help='Input folder where the *tif images should be', required=True)
+    parser.add_argument('-f', '--folder', help='Input folder where the images should be', required=True)
     parser.add_argument('-l', '--labels', nargs='+', help='Possible labels in the images', required=True)
     args = parser.parse_args()
 
@@ -193,7 +195,7 @@ if __name__ == "__main__":
     # Put all image file paths into a list
     paths = []
     for file in os.listdir(input_folder):
-        if file.endswith(".tif") or file.endswith(".tiff"):
+        if file.endswith(".png") or file.endswith(".jpg") or file.endswith(".jpeg"):
 
             path = os.path.join(input_folder, file)
             paths.append(path)

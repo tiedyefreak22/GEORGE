@@ -7,16 +7,13 @@ import random
 import io
 import imageio
 import glob
-#import imutils
 import cv2
-#import scipy
 import numpy as np
 from six import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 from IPython.display import display, Javascript
 from IPython.display import Image as IPyImage
 from tqdm import tqdm
-#import time
 import math
 import tensorflow as tf
 import tensorflow_datasets as tfds
@@ -31,7 +28,6 @@ import skimage
 import skimage.io
 import skimage.transform
 from skimage import io, transform
-#import seaborn as sns
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
 from plotly import tools
@@ -56,7 +52,8 @@ IMAGE_PATH = 'Yang Model Training/bee_imgs/bee_imgs/'
 IMAGE_WIDTH = 75
 IMAGE_HEIGHT = 150
 IMAGE_CHANNELS = 3
-category_index = {1: {'id': 1, 'name': 'regular'}, 2: {'id': 2, 'name': 'cooling'}, 3: {'id': 3, 'name': 'pollen'}, 4: {'id': 4, 'name': 'varroa'}, 5: {'id': 5, 'name': 'wasps'}}
+category_index = {1: {'id': 1, 'name': 'regular'}, 2: {'id': 2, 'name': 'pollen'}, 3: {'id': 3, 'name': 'varroa'}, 4: {'id': 4, 'name': 'wasps'}}
+#category_index = {1: {'id': 1, 'name': 'regular'}, 2: {'id': 2, 'name': 'cooling'}, 3: {'id': 3, 'name': 'pollen'}, 4: {'id': 4, 'name': 'varroa'}, 5: {'id': 5, 'name': 'wasps'}}
 batch_size = 64
 
 
@@ -120,7 +117,8 @@ def get_label(label):
     for j in range(len(label) + 1):
         trans_label.append(label[j-1]*j)
     trans_label = np.array(int(np.sum(trans_label)))
-    return list(category_index.values())[trans_label], tf.one_hot(trans_label, 5), [trans_label + 1]
+    return list(category_index.values())[trans_label], tf.one_hot(trans_label, 4), [trans_label + 1]
+    #return list(category_index.values())[trans_label], tf.one_hot(trans_label, 5), [trans_label + 1]
 
 def zoom_image (new_image):
     # new input is a uint8 numpy array with shape (img_height, img_width, 3)
@@ -243,7 +241,6 @@ def process_image(new_image):
     new_image = tf.image.resize(np.array(new_image), (h, w))
     new_image = tf.reshape(new_image, (list(np.shape(new_image))[0],list(np.shape(new_image))[1],3))
     new_image = tf.image.pad_to_bounding_box(new_image, y_offset, x_offset, 640, 640)
-    #new_image = tf.cast(new_image, tf.float32)/255.0
     new_image = tf.cast(new_image, tf.uint8)
     
     coord_adder = [y_offset, x_offset, y_offset, x_offset]
@@ -372,14 +369,14 @@ def categories_encoder(dataset, var='subspecies'):
     return X, y
 
 def create_trace(x,y,ylabel,color):
-        trace = go.Scatter(
-            x = x,y = y,
-            name=ylabel,
-            marker=dict(color=color),
-            mode = "markers+lines",
-            text=x
-        )
-        return trace
+    trace = go.Scatter(
+        x = x,y = y,
+        name=ylabel,
+        marker=dict(color=color),
+        mode = "markers+lines",
+        text=x
+    )
+    return trace
     
 def plot_accuracy_and_loss(train_model):
     hist = train_model.history
@@ -442,7 +439,8 @@ def get_file_and_info(filename):
 
 def prep_train_imgs(train_images_np, train_labels, gt_boxes):
     # By convention, our non-background classes start counting at 1.
-    num_classes = 5
+    num_classes = 4
+    #num_classes = 5
 
     # Convert class labels to one-hot; convert everything to tensors.
     train_image_tensors = []
@@ -502,7 +500,7 @@ def get_model_train_step_function(model, optimizer, vars_to_fine_tune):
 
     return train_step_fn
 
-#@tf.function
+@tf.function(input_signature=[tf.TensorSpec(shape=[None,640,640,3], dtype=tf.float32)])
 def detect(input_tensor):
     """Run detection on an input image.
 

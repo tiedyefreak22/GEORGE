@@ -12,7 +12,7 @@
 """
 
 import argparse
-import Tkinter as tk
+import tkinter as tk
 import os
 from shutil import copyfile, move
 from PIL import ImageTk, Image
@@ -147,7 +147,7 @@ class ImageGui:
         """
         root, file_name = os.path.split(input_path)
         output_path = os.path.join(root, label, file_name)
-        print " %s --> %s" % (file_name, label)
+        print(" %s --> %s" % (file_name, label))
         copyfile(input_path, output_path)
 
     @staticmethod
@@ -161,7 +161,7 @@ class ImageGui:
         """
         root, file_name = os.path.split(input_path)
         output_path = os.path.join(root, label, file_name)
-        print " %s --> %s" % (file_name, label)
+        print(" %s --> %s" % (file_name, label))
         move(input_path, output_path)
 
 
@@ -193,7 +193,7 @@ if __name__ == "__main__":
     # Put all image file paths into a list
     paths = []
     for file in os.listdir(input_folder):
-        if file.endswith(".tif") or file.endswith(".tiff"):
+        if file.endswith(".png") or file.endswith(".jpg") or file.endswith(".jpeg"):
 
             path = os.path.join(input_folder, file)
             paths.append(path)
