@@ -1,0 +1,6 @@
+[submodule "Archive/BeeAlarmed"]
+	path = Archive/BeeAlarmed
+	url = https://github.com/BeeAlarmed/BeeAlarmed.git
+[submodule "models"]
+	path = models
+	url = https://github.com/tensorflow/models.git
