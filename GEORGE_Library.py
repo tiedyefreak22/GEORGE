@@ -1,3 +1,10 @@
+'''
+=========================================================================
+Gradient-Effected Object Recognition Gauge for hive Entrances (GEORGE)
+Neural-net-powered honeybee hive-mounted pollen, varroa, and wasp counter
+#========================================================================
+'''
+
 import os
 import pathlib
 import matplotlib
@@ -53,30 +60,29 @@ IMAGE_WIDTH = 75
 IMAGE_HEIGHT = 150
 IMAGE_CHANNELS = 3
 category_index = {1: {'id': 1, 'name': 'regular'}, 2: {'id': 2, 'name': 'pollen'}, 3: {'id': 3, 'name': 'varroa'}, 4: {'id': 4, 'name': 'wasps'}}
-#category_index = {1: {'id': 1, 'name': 'regular'}, 2: {'id': 2, 'name': 'cooling'}, 3: {'id': 3, 'name': 'pollen'}, 4: {'id': 4, 'name': 'varroa'}, 5: {'id': 5, 'name': 'wasps'}}
 batch_size = 64
 
 
-def load_image_into_numpy_array(path):
-    """Load an image from file into a numpy array.
+# def load_image_into_numpy_array(path): # credit: deeplearning.ai (https://github.com/https-deeplearning-ai)
+#     """Load an image from file into a numpy array.
 
-    Puts image into numpy array to feed into tensorflow graph.
-    Note that by convention we put it into a numpy array with shape
-    (height, width, channels), where channels=3 for RGB.
+#     Puts image into numpy array to feed into tensorflow graph.
+#     Note that by convention we put it into a numpy array with shape
+#     (height, width, channels), where channels=3 for RGB.
 
-    Args:
-        path: a file path.
+#     Args:
+#         path: a file path.
 
-    Returns:
-        uint8 numpy array with shape (img_height, img_width, 3)
-    """
-    img_data = tf.io.gfile.GFile(path, 'rb').read()
-    image = Image.open(BytesIO(img_data))
-    (im_width, im_height) = image.size
-    return np.array(image.getdata()).reshape(
-        (im_height, im_width, 3)).astype(np.uint8)
+#     Returns:
+#         uint8 numpy array with shape (img_height, img_width, 3)
+#     """
+#     img_data = tf.io.gfile.GFile(path, 'rb').read()
+#     image = Image.open(BytesIO(img_data))
+#     (im_width, im_height) = image.size
+#     return np.array(image.getdata()).reshape(
+#         (im_height, im_width, 3)).astype(np.uint8)
 
-def plot_detections(image_np,
+def plot_detections(image_np, # credit: deeplearning.ai (https://github.com/https-deeplearning-ai)
                     boxes,
                     classes,
                     scores,
@@ -118,11 +124,8 @@ def get_label(label):
         trans_label.append(label[j-1]*j)
     trans_label = np.array(int(np.sum(trans_label)))
     return list(category_index.values())[trans_label], tf.one_hot(trans_label, 4), [trans_label + 1]
-    #return list(category_index.values())[trans_label], tf.one_hot(trans_label, 5), [trans_label + 1]
 
 def zoom_image (new_image):
-    # new input is a uint8 numpy array with shape (img_height, img_width, 3)
-    # input is uint8 eagerTensor, non-normalized (values between 0 and 255)
     DataGen = tf.keras.Sequential([layers.RandomZoom(0.1, 0.1)])
     new_image = tf.cast(np.array(new_image), tf.float32)
     new_image = DataGen(new_image)
@@ -141,7 +144,7 @@ def extract_sub(test_image, params=[110, 254, 1.001, -0.099]):
 
     aperture_size = 3 # Aperture size (default = 3)
     L2Gradient = False # Boolean (default = False)
-    edges = cv2.Canny(np.array(new_image), params[0], params[1], apertureSize = aperture_size, L2gradient = L2Gradient) # 150, 75 confirmed
+    edges = cv2.Canny(np.array(new_image), params[0], params[1], apertureSize = aperture_size, L2gradient = L2Gradient)
     ymin = h
     xmin = w
     ymax = 0
@@ -149,7 +152,7 @@ def extract_sub(test_image, params=[110, 254, 1.001, -0.099]):
     coords = [ymin, xmin, ymax, xmax]
     
     # Find left bound/xmin
-    left_bound = np.zeros([h, w]) # 150, 75 confirmed
+    left_bound = np.zeros([h, w])
     row_track = 0
     while row_track <= h - 1:
         column_track = 0
@@ -179,7 +182,7 @@ def extract_sub(test_image, params=[110, 254, 1.001, -0.099]):
         row_track = row_track + 1
 
     # Find top bound/ymin
-    top_bound = np.zeros([w, h]) # 75, 150 confirmed
+    top_bound = np.zeros([w, h])
     column_track = 0
     while column_track <= w - 1:
         row_track = 0
@@ -249,12 +252,12 @@ def process_image(new_image):
 
     return new_image, coords
 
-def unison_shuffle(arr1, arr2):
-    assert len(arr1) == len(arr2)
-    p = np.random.permutation(len(arr1))
-    new_arr1 = [arr1[i] for i in p]
-    new_arr2 = [arr2[j] for j in p]
-    return new_arr1, new_arr2
+# def unison_shuffle(arr1, arr2):
+#     assert len(arr1) == len(arr2)
+#     p = np.random.permutation(len(arr1))
+#     new_arr1 = [arr1[i] for i in p]
+#     new_arr2 = [arr2[j] for j in p]
+#     return new_arr1, new_arr2
 
 # Automatic brightness and contrast optimization with optional histogram clipping
 def automatic_brightness_and_contrast(image):
@@ -270,160 +273,159 @@ def automatic_brightness_and_contrast(image):
     auto_result = cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
     return (np.array(auto_result).astype('uint8'))#, alpha, beta)
         
-def augment_npset(dataset, opt_labels, training = True, num_images = None, set_name = None, ex_sub = True):
-    assert(len(dataset) == len(opt_labels))
-    if num_images == None:
-            num_images = len(dataset)
-    train_images_np = [0] * num_images
-    gt_boxes = [0] * num_images
-    train_labels = [0] * num_images
-    #subset, new_labels = unison_shuffle(dataset, opt_labels)
-    subset = dataset
-    new_labels = opt_labels
-    with tqdm(total=num_images, desc=str(set_name), unit="images") as pbar:
-        for i in range(num_images):
-            new_image = subset[i]
-            label = new_labels[i]
-            train_labels[i] = get_label(label)
-            new_image = automatic_brightness_and_contrast(new_image)
-            new_image = zoom_image(new_image)
-            if ex_sub:
-                new_image = extract_sub(np.array(new_image))
-            new_image, new_coords = process_image(new_image)
-            train_images_np[i] = np.array(new_image)
-            if training:
-                gt_boxes[i] = np.array([new_coords], dtype=np.float32)
-            pbar.update(1)
-    if training:
-        print('Succeeded for ' + str(len(train_images_np)) + ' of ' + str(num_images), flush=True)
-        return train_images_np, gt_boxes, train_labels
-    else:
-        print('Succeeded for ' + str(len(train_images_np)) + ' of ' + str(num_images), flush=True)
-        return train_images_np
+# def augment_npset(dataset, opt_labels, training = True, num_images = None, set_name = None, ex_sub = True):
+#     assert(len(dataset) == len(opt_labels))
+#     if num_images == None:
+#             num_images = len(dataset)
+#     train_images_np = [0] * num_images
+#     gt_boxes = [0] * num_images
+#     train_labels = [0] * num_images
+#     subset = dataset
+#     new_labels = opt_labels
+#     with tqdm(total=num_images, desc=str(set_name), unit="images") as pbar:
+#         for i in range(num_images):
+#             new_image = subset[i]
+#             label = new_labels[i]
+#             train_labels[i] = get_label(label)
+#             new_image = automatic_brightness_and_contrast(new_image)
+#             new_image = zoom_image(new_image)
+#             if ex_sub:
+#                 new_image = extract_sub(np.array(new_image))
+#             new_image, new_coords = process_image(new_image)
+#             train_images_np[i] = np.array(new_image)
+#             if training:
+#                 gt_boxes[i] = np.array([new_coords], dtype=np.float32)
+#             pbar.update(1)
+#     if training:
+#         print('Succeeded for ' + str(len(train_images_np)) + ' of ' + str(num_images), flush=True)
+#         return train_images_np, gt_boxes, train_labels
+#     else:
+#         print('Succeeded for ' + str(len(train_images_np)) + ' of ' + str(num_images), flush=True)
+#         return train_images_np
 
-def missing_data(data):
-    total = data.isnull().sum().sort_values(ascending = False)
-    percent = (data.isnull().sum()/data.isnull().count()*100).sort_values(ascending = False)
-    return pd.concat([total, percent], axis=1, keys=['Total', 'Percent'])
+# def missing_data(data):
+#     total = data.isnull().sum().sort_values(ascending = False)
+#     percent = (data.isnull().sum()/data.isnull().count()*100).sort_values(ascending = False)
+#     return pd.concat([total, percent], axis=1, keys=['Total', 'Percent'])
 
-def read_image_sizes(file_name):
-    image = skimage.io.imread(IMAGE_PATH + file_name)
-    return list(image.shape)
+# def read_image_sizes(file_name):
+#     image = skimage.io.imread(IMAGE_PATH + file_name)
+#     return list(image.shape)
     
-def draw_category_images(var,cols=5):
-    categories = (honey_bee_df.groupby([var])[var].nunique()).index
-    f, ax = plt.subplots(nrows=len(categories),ncols=cols, figsize=(2*cols,2*len(categories)))
-    # draw a number of images for each location
-    for i, cat in enumerate(categories):
-        sample = honey_bee_df[honey_bee_df[var]==cat].sample(cols)
-        for j in range(0,cols):
-            file=IMAGE_PATH + sample.iloc[j]['file']
-            im=imageio.imread(file)
-            ax[i, j].imshow(im, resample=True)
-            ax[i, j].set_title(cat, fontsize=9)  
-    plt.tight_layout()
-    plt.show()
+# def draw_category_images(var,cols=5):
+#     categories = (honey_bee_df.groupby([var])[var].nunique()).index
+#     f, ax = plt.subplots(nrows=len(categories),ncols=cols, figsize=(2*cols,2*len(categories)))
+#     # draw a number of images for each location
+#     for i, cat in enumerate(categories):
+#         sample = honey_bee_df[honey_bee_df[var]==cat].sample(cols)
+#         for j in range(0,cols):
+#             file=IMAGE_PATH + sample.iloc[j]['file']
+#             im=imageio.imread(file)
+#             ax[i, j].imshow(im, resample=True)
+#             ax[i, j].set_title(cat, fontsize=9)  
+#     plt.tight_layout()
+#     plt.show()
     
-def draw_trace_box(dataset,var, subspecies):
-    dfS = dataset[dataset['subspecies']==subspecies];
-    trace = go.Box(
-        x = dfS[var],
-        name=subspecies,
-        marker=dict(
-                    line=dict(
-                        color='black',
-                        width=0.8),
-                ),
-        text=dfS['subspecies'], 
-        orientation = 'h'
-    )
-    return trace
+# def draw_trace_box(dataset,var, subspecies):
+#     dfS = dataset[dataset['subspecies']==subspecies];
+#     trace = go.Box(
+#         x = dfS[var],
+#         name=subspecies,
+#         marker=dict(
+#                     line=dict(
+#                         color='black',
+#                         width=0.8),
+#                 ),
+#         text=dfS['subspecies'], 
+#         orientation = 'h'
+#     )
+#     return trace
 
-def draw_group(dataset, var, title,height=500):
-    data = list()
-    for subs in subspecies:
-        data.append(draw_trace_box(dataset, var, subs))
+# def draw_group(dataset, var, title,height=500):
+#     data = list()
+#     for subs in subspecies:
+#         data.append(draw_trace_box(dataset, var, subs))
         
-    layout = dict(title = title,
-              xaxis = dict(title = 'Size',showticklabels=True),
-              yaxis = dict(title = 'Subspecies', showticklabels=True, tickfont=dict(
-                family='Old Standard TT, serif',
-                size=8,
-                color='black'),), 
-              hovermode = 'closest',
-              showlegend=False,
-                  width=600,
-                  height=height,
-             )
-    fig = dict(data=data, layout=layout)
-    iplot(fig, filename='subspecies-image')
+#     layout = dict(title = title,
+#               xaxis = dict(title = 'Size',showticklabels=True),
+#               yaxis = dict(title = 'Subspecies', showticklabels=True, tickfont=dict(
+#                 family='Old Standard TT, serif',
+#                 size=8,
+#                 color='black'),), 
+#               hovermode = 'closest',
+#               showlegend=False,
+#                   width=600,
+#                   height=height,
+#              )
+#     fig = dict(data=data, layout=layout)
+#     iplot(fig, filename='subspecies-image')
     
-def read_image(file_name):
-    image = skimage.io.imread(IMAGE_PATH + file_name)
-    image = skimage.transform.resize(image, (IMAGE_HEIGHT, IMAGE_WIDTH), mode='reflect')
-    return image[:,:,:IMAGE_CHANNELS]
+# def read_image(file_name):
+#     image = skimage.io.imread(IMAGE_PATH + file_name)
+#     image = skimage.transform.resize(image, (IMAGE_HEIGHT, IMAGE_WIDTH), mode='reflect')
+#     return image[:,:,:IMAGE_CHANNELS]
 
-def categories_encoder(dataset, var='subspecies'):
-    X = np.stack(dataset['file'].apply(read_image))
-    y = pd.get_dummies(dataset[var], drop_first=False)
-    return X, y
+# def categories_encoder(dataset, var='subspecies'):
+#     X = np.stack(dataset['file'].apply(read_image))
+#     y = pd.get_dummies(dataset[var], drop_first=False)
+#     return X, y
 
-def create_trace(x,y,ylabel,color):
-    trace = go.Scatter(
-        x = x,y = y,
-        name=ylabel,
-        marker=dict(color=color),
-        mode = "markers+lines",
-        text=x
-    )
-    return trace
+# def create_trace(x,y,ylabel,color):
+#     trace = go.Scatter(
+#         x = x,y = y,
+#         name=ylabel,
+#         marker=dict(color=color),
+#         mode = "markers+lines",
+#         text=x
+#     )
+#     return trace
     
-def plot_accuracy_and_loss(train_model):
-    hist = train_model.history
-    acc = hist['acc']
-    val_acc = hist['val_acc']
-    loss = hist['loss']
-    val_loss = hist['val_loss']
-    epochs = list(range(1,len(acc)+1))
-    #define the traces
-    trace_ta = create_trace(epochs,acc,"Training accuracy", "Green")
-    trace_va = create_trace(epochs,val_acc,"Validation accuracy", "Red")
-    trace_tl = create_trace(epochs,loss,"Training loss", "Blue")
-    trace_vl = create_trace(epochs,val_loss,"Validation loss", "Magenta")
-    fig = tools.make_subplots(rows=1,cols=2, subplot_titles=('Training and validation accuracy',
-                                                             'Training and validation loss'))
-    #add traces to the figure
-    fig.append_trace(trace_ta,1,1)
-    fig.append_trace(trace_va,1,1)
-    fig.append_trace(trace_tl,1,2)
-    fig.append_trace(trace_vl,1,2)
-    #set the layout for the figure
-    fig['layout']['xaxis'].update(title = 'Epoch')
-    fig['layout']['xaxis2'].update(title = 'Epoch')
-    fig['layout']['yaxis'].update(title = 'Accuracy', range=[0,1])
-    fig['layout']['yaxis2'].update(title = 'Loss', range=[0,1])
-    #plot
-    iplot(fig, filename='accuracy-loss')
+# def plot_accuracy_and_loss(train_model):
+#     hist = train_model.history
+#     acc = hist['acc']
+#     val_acc = hist['val_acc']
+#     loss = hist['loss']
+#     val_loss = hist['val_loss']
+#     epochs = list(range(1,len(acc)+1))
+#     #define the traces
+#     trace_ta = create_trace(epochs,acc,"Training accuracy", "Green")
+#     trace_va = create_trace(epochs,val_acc,"Validation accuracy", "Red")
+#     trace_tl = create_trace(epochs,loss,"Training loss", "Blue")
+#     trace_vl = create_trace(epochs,val_loss,"Validation loss", "Magenta")
+#     fig = tools.make_subplots(rows=1,cols=2, subplot_titles=('Training and validation accuracy',
+#                                                              'Training and validation loss'))
+#     #add traces to the figure
+#     fig.append_trace(trace_ta,1,1)
+#     fig.append_trace(trace_va,1,1)
+#     fig.append_trace(trace_tl,1,2)
+#     fig.append_trace(trace_vl,1,2)
+#     #set the layout for the figure
+#     fig['layout']['xaxis'].update(title = 'Epoch')
+#     fig['layout']['xaxis2'].update(title = 'Epoch')
+#     fig['layout']['yaxis'].update(title = 'Accuracy', range=[0,1])
+#     fig['layout']['yaxis2'].update(title = 'Loss', range=[0,1])
+#     #plot
+#     iplot(fig, filename='accuracy-loss')
     
-def test_accuracy_report(model):
-    predicted = model.predict(X_test)
-    test_predicted = np.argmax(predicted, axis=1)
-    test_truth = np.argmax(y_test.values, axis=1)
-    print(metrics.classification_report(test_truth, test_predicted, target_names=y_test.columns)) 
-    test_res = model.evaluate(X_test, y_test.values, verbose=0)
-    print('Loss function: %s, accuracy:' % test_res[0], test_res[1])
+# def test_accuracy_report(model):
+#     predicted = model.predict(X_test)
+#     test_predicted = np.argmax(predicted, axis=1)
+#     test_truth = np.argmax(y_test.values, axis=1)
+#     print(metrics.classification_report(test_truth, test_predicted, target_names=y_test.columns)) 
+#     test_res = model.evaluate(X_test, y_test.values, verbose=0)
+#     print('Loss function: %s, accuracy:' % test_res[0], test_res[1])
 
-def PD_dataset(file_list, size=(IMAGE_HEIGHT, IMAGE_WIDTH), flattened=False):
-    data = []
-    for i, file in enumerate(file_list):
-        image = io.imread(file)
-        image = transform.resize(image, size, mode='constant')
-        if flattened:
-            image = image.flatten()
-        data.append(image * 255)
-    labels = [1 if f.split("images")[-1][1] == 'P' else 0 for f in file_list]
+# def PD_dataset(file_list, size=(IMAGE_HEIGHT, IMAGE_WIDTH), flattened=False):
+#     data = []
+#     for i, file in enumerate(file_list):
+#         image = io.imread(file)
+#         image = transform.resize(image, size, mode='constant')
+#         if flattened:
+#             image = image.flatten()
+#         data.append(image * 255)
+#     labels = [1 if f.split("images")[-1][1] == 'P' else 0 for f in file_list]
 
-    return np.array(data).astype('uint8'), np.array(labels)
+#     return np.array(data).astype('uint8'), np.array(labels)
 
 def get_file_and_info(filename):
     temp_label = np.zeros(5)
