@@ -3,3 +3,5 @@
 **/*.ipynb_checkpoints/
 **/*.icloud/
 **/__pycache__
+Dataset/TrainAugmented.zip
+Dataset/ValAugmented.zip
