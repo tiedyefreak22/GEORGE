@@ -458,7 +458,7 @@ def prep_train_imgs(train_images_np, train_labels, gt_boxes):
     return train_image_tensors, gt_box_tensors, gt_classes_one_hot_tensors
 
 # Set up forward + backward pass for a single train step.
-def get_model_train_step_function(model, optimizer, vars_to_fine_tune):
+def get_model_train_step_function(model, optimizer, vars_to_fine_tune): # credit: deeplearning.ai (https://github.com/https-deeplearning-ai)
     """Get a tf.function for training step."""
 
     # Use tf.function for a bit of speed.
