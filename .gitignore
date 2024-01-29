@@ -1,4 +1,3 @@
-
 **/.DS_Store
 **/*.ipynb_checkpoints/
 **/*.icloud/
@@ -8,9 +7,7 @@ Dataset/ValAugmented.zip
 **/.ipynb_checkpoints
 /Archive
 BeeDetection.py
-GEORGE_Canny_Experiment.ipynb
 GEORGE_Model_Training2.ipynb
 sort_folder.py
-start_tf_jupyter.cmd
 transfer_learning.ipynb
 transfer_learning_with_hub.ipynb
