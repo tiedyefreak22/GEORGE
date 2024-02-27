@@ -229,7 +229,10 @@ def process_image(new_image):
     x_offset = tf.random.uniform((), 0 , tf.cast(640-w, tf.int32), dtype=tf.int32)
     y_offset = tf.random.uniform((), 0 , tf.cast(640-h, tf.int32), dtype=tf.int32)
     new_image = tf.image.resize(np.array(new_image), (h, w))
-    new_image = tf.reshape(new_image, (list(np.shape(new_image))[0],list(np.shape(new_image))[1],3))
+    if np.shape(new_image)[2] == 3:
+        new_image = tf.reshape(new_image, (list(np.shape(new_image))[0],list(np.shape(new_image))[1],3))
+    elif np.shape(new_image)[2] == 4:
+        new_image = tf.reshape(new_image, (list(np.shape(new_image))[0],list(np.shape(new_image))[1],4))
     new_image = tf.image.pad_to_bounding_box(new_image, y_offset, x_offset, 640, 640)
     new_image = tf.cast(new_image, tf.uint8)
     
@@ -327,32 +330,3 @@ def get_model_train_step_function(model, optimizer, vars_to_fine_tune): # credit
         return total_loss
 
     return train_step_fn
-
-def do_image(original, filename, thresh_lo = 157, thresh_hi = 200, erode_val = 10, gauss_val = 9, exponent = 0.18, gauss_val2 = 3, R = 135, G = 226, B = 192):
-    original = cv2.cvtColor(original, cv2.COLOR_BGR2RGB)
-    r_channel, g_channel, b_channel = cv2.split(original)
-    color_channels = [r_channel, g_channel, b_channel]
-    alpha_channel = np.ones(b_channel.shape, dtype=b_channel.dtype) * 50 #creating a dummy alpha channel image.
-    default_vals = [R, G, B]
-        
-    border_int = 3
-    img = cv2.copyMakeBorder(cv2.cvtColor(original, cv2.COLOR_BGR2GRAY), border_int, border_int, border_int, border_int, cv2.BORDER_CONSTANT, value=255)
-    
-    ret, thresh = cv2.threshold(img, thresh_lo, thresh_hi, cv2.THRESH_BINARY)
-    dist = cv2.distanceTransform(thresh, cv2.DIST_L2, cv2.DIST_MASK_PRECISE)
-    dist = cv2.GaussianBlur(dist, (gauss_val, gauss_val), 0)
-    dist = dist[border_int:img.shape[0]-border_int, border_int:img.shape[1]-border_int]
-    norm_dist = cv2.normalize(dist, None, 0, 1.0, cv2.NORM_MINMAX)
-    alpha_channel = cv2.bitwise_not((255 * norm_dist).astype(b_channel.dtype))
-    
-    kernel = np.ones((erode_val, erode_val), np.uint8)
-    alpha_channel = cv2.erode(alpha_channel, kernel)
-    
-    img_RGBA = Image.fromarray(cv2.cvtColor(cv2.merge((r_channel, g_channel, b_channel, alpha_channel)), cv2.COLOR_BGRA2RGBA))
-    
-    # flattens alpha-channel image
-    background = Image.new('RGBA', (np.shape(img_RGBA)[1], np.shape(img_RGBA)[0]), (255,255,255))
-    img_RGB = Image.fromarray(cv2.cvtColor(np.array(Image.alpha_composite(background, img_RGBA)), cv2.COLOR_RGBA2RGB))
-    img_RGB.save("tmp/" + filename, 'JPEG', quality=100, subsampling=0)
-    
-    return Image.open("tmp/" + filename), alpha_channel
