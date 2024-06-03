@@ -1,0 +1,70 @@
+{
+    "info": {
+        "year": 2024,
+        "version": 1.0,
+        "description": "GEORGE Custom Dataset",
+        "contributor": "Kevin Hardin",
+        "url": "https://www.kaggle.com/datasets/kevinhardin/george-augmented-dataset",
+        "date_created": "2024-06-02 20:24:54.885366"
+    },
+    "images": [
+        {
+            "img_id": 1,
+            "width": 640,
+            "height": 640,
+            "file_name": 1,
+            "license": 1,
+            "flickr_url": null,
+            "coco_url": null,
+            "date_captured": "2024-06-02 20:24:54.714395"
+        }
+    ],
+    "annotations": [
+        {
+            "ann_id": 0,
+            "image_id": 1,
+            "segmentation": null,
+            "area": 7344.0,
+            "bbox": [
+                62.0,
+                66.0,
+                68.0,
+                108.0
+            ],
+            "iscrowd": 0
+        },
+        {
+            "ann_id": 1,
+            "image_id": 1,
+            "segmentation": null,
+            "area": 6400.0,
+            "bbox": [
+                208.0,
+                510.0,
+                80.0,
+                80.0
+            ],
+            "iscrowd": 0
+        },
+        {
+            "ann_id": 2,
+            "image_id": 1,
+            "segmentation": null,
+            "area": 9632.0,
+            "bbox": [
+                465.0,
+                194.0,
+                112.0,
+                86.0
+            ],
+            "iscrowd": 0
+        }
+    ],
+    "licenses": [
+        {
+            "lic_id": 1,
+            "name": "Attribution-NonCommercial-ShareAlike 4.0 International",
+            "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+        }
+    ]
+}

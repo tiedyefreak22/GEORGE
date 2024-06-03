@@ -216,7 +216,7 @@ def extract_sub(test_image, params=[110, 254, 1.001, -0.099]):
     
     return np.array(new_image).astype('uint8')
 
-def process_image(new_image):
+def process_image(new_image, BG_img):
     new_image = Image.fromarray(new_image)
     rotation_range=random.uniform(0, 360)
     new_image = new_image.rotate(rotation_range, Image.BILINEAR, expand = 1)
@@ -233,14 +233,14 @@ def process_image(new_image):
         new_image = tf.reshape(new_image, (list(np.shape(new_image))[0],list(np.shape(new_image))[1],3))
     elif np.shape(new_image)[2] == 4:
         new_image = tf.reshape(new_image, (list(np.shape(new_image))[0],list(np.shape(new_image))[1],4))
-    new_image = tf.image.pad_to_bounding_box(new_image, y_offset, x_offset, 640, 640)
-    new_image = tf.cast(new_image, tf.uint8)
-    
+    new_image = tf.keras.utils.array_to_img(new_image).convert('RGBA')
+    BG_img.paste(new_image, (y_offset, x_offset), new_image)
+
     coord_adder = [y_offset, x_offset, y_offset, x_offset]
     coords = np.array([sum(i) for i in zip(coords, coord_adder)])
     coords = np.array([(i / 640) for i in coords])
 
-    return new_image, coords
+    return BG_img, coords
 
 # Automatic brightness and contrast optimization with optional histogram clipping
 def automatic_brightness_and_contrast(image):
