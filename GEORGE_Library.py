@@ -54,7 +54,6 @@ from keras.layers import Dense, Conv2D, Flatten, MaxPool2D, Dropout, BatchNormal
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import ModelCheckpoint, Callback, EarlyStopping, ReduceLROnPlateau, LearningRateScheduler
 from keras.utils import to_categorical
-import warnings
 from collections import defaultdict
 import json
 from datetime import datetime
