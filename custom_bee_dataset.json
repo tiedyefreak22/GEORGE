@@ -5,66 +5,209 @@
         "description": "GEORGE Custom Dataset",
         "contributor": "Kevin Hardin",
         "url": "https://www.kaggle.com/datasets/kevinhardin/george-augmented-dataset",
-        "date_created": "2024-06-02 20:24:54.885366"
+        "date_created": "2024-06-07 19:49:45.792997"
     },
     "images": [
         {
-            "img_id": 1,
+            "id": 1,
             "width": 640,
             "height": 640,
             "file_name": 1,
             "license": 1,
             "flickr_url": null,
             "coco_url": null,
-            "date_captured": "2024-06-02 20:24:54.714395"
+            "date_captured": "2024-06-07 19:49:45.029771"
+        },
+        {
+            "id": 2,
+            "width": 640,
+            "height": 640,
+            "file_name": 2,
+            "license": 1,
+            "flickr_url": null,
+            "coco_url": null,
+            "date_captured": "2024-06-07 19:49:45.242023"
+        },
+        {
+            "id": 3,
+            "width": 640,
+            "height": 640,
+            "file_name": 3,
+            "license": 1,
+            "flickr_url": null,
+            "coco_url": null,
+            "date_captured": "2024-06-07 19:49:45.402386"
+        },
+        {
+            "id": 4,
+            "width": 640,
+            "height": 640,
+            "file_name": 4,
+            "license": 1,
+            "flickr_url": null,
+            "coco_url": null,
+            "date_captured": "2024-06-07 19:49:45.614842"
         }
     ],
     "annotations": [
         {
-            "ann_id": 0,
+            "id": 0,
             "image_id": 1,
             "segmentation": null,
-            "area": 7344.0,
+            "area": 4488.0,
             "bbox": [
-                62.0,
+                12.0,
+                532.0,
                 66.0,
-                68.0,
-                108.0
+                68.0
             ],
             "iscrowd": 0
         },
         {
-            "ann_id": 1,
+            "id": 1,
             "image_id": 1,
             "segmentation": null,
-            "area": 6400.0,
+            "area": 3796.0,
             "bbox": [
-                208.0,
-                510.0,
+                25.0,
+                172.0,
+                52.0,
+                73.0
+            ],
+            "iscrowd": 0
+        },
+        {
+            "id": 2,
+            "image_id": 1,
+            "segmentation": null,
+            "area": 7200.0,
+            "bbox": [
+                178.0,
+                289.0,
                 80.0,
+                90.0
+            ],
+            "iscrowd": 0
+        },
+        {
+            "id": 0,
+            "image_id": 2,
+            "segmentation": null,
+            "area": 4032.0,
+            "bbox": [
+                507.0,
+                237.0,
+                84.0,
+                48.0
+            ],
+            "iscrowd": 0
+        },
+        {
+            "id": 0,
+            "image_id": 3,
+            "segmentation": null,
+            "area": 4928.0,
+            "bbox": [
+                566.0,
+                505.0,
+                56.0,
+                88.0
+            ],
+            "iscrowd": 0
+        },
+        {
+            "id": 1,
+            "image_id": 3,
+            "segmentation": null,
+            "area": 7200.0,
+            "bbox": [
+                481.0,
+                34.0,
+                90.0,
                 80.0
             ],
             "iscrowd": 0
         },
         {
-            "ann_id": 2,
-            "image_id": 1,
+            "id": 2,
+            "image_id": 3,
             "segmentation": null,
-            "area": 9632.0,
+            "area": 5940.0,
             "bbox": [
-                465.0,
-                194.0,
-                112.0,
-                86.0
+                451.0,
+                384.0,
+                66.0,
+                90.0
+            ],
+            "iscrowd": 0
+        },
+        {
+            "id": 0,
+            "image_id": 4,
+            "segmentation": null,
+            "area": 6840.0,
+            "bbox": [
+                56.0,
+                121.0,
+                76.0,
+                90.0
+            ],
+            "iscrowd": 0
+        },
+        {
+            "id": 1,
+            "image_id": 4,
+            "segmentation": null,
+            "area": 3132.0,
+            "bbox": [
+                534.0,
+                583.0,
+                58.0,
+                54.0
+            ],
+            "iscrowd": 0
+        },
+        {
+            "id": 2,
+            "image_id": 4,
+            "segmentation": null,
+            "area": 7216.0,
+            "bbox": [
+                428.0,
+                149.0,
+                88.0,
+                82.0
             ],
             "iscrowd": 0
         }
     ],
     "licenses": [
         {
-            "lic_id": 1,
+            "id": 1,
             "name": "Attribution-NonCommercial-ShareAlike 4.0 International",
             "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+        }
+    ],
+    "categories": [
+        {
+            "id": 1,
+            "name": "None",
+            "supercategory": null
+        },
+        {
+            "id": 2,
+            "name": "Pollen",
+            "supercategory": null
+        },
+        {
+            "id": 3,
+            "name": "Varroa",
+            "supercategory": null
+        },
+        {
+            "id": 4,
+            "name": "Wasps",
+            "supercategory": null
         }
     ]
 }

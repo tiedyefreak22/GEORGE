@@ -55,6 +55,8 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import ModelCheckpoint, Callback, EarlyStopping, ReduceLROnPlateau, LearningRateScheduler
 from keras.utils import to_categorical
 import warnings
+from collections import defaultdict
+import json
 
 global IMAGE_PATH
 global IMAGE_WIDTH
@@ -63,8 +65,8 @@ global IMAGE_CHANNELS
 global category_index
 
 IMAGE_PATH = 'Yang Model Training/bee_imgs/bee_imgs/'
-IMAGE_WIDTH = 75
-IMAGE_HEIGHT = 150
+IMAGE_WIDTH = 20
+IMAGE_HEIGHT = 40
 IMAGE_CHANNELS = 3
 category_index = {1: {'id': 1, 'name': 'regular'}, 2: {'id': 2, 'name': 'pollen'}, 3: {'id': 3, 'name': 'varroa'}, 4: {'id': 4, 'name': 'wasps'}}
 batch_size = 64
@@ -330,3 +332,38 @@ def get_model_train_step_function(model, optimizer, vars_to_fine_tune): # credit
         return total_loss
 
     return train_step_fn
+
+class COCOParser:
+    def __init__(self, anns_file, imgs_dir):
+        with open(anns_file, 'r') as f:
+            coco = json.load(f)
+            
+        self.annIm_dict = defaultdict(list)        
+        self.cat_dict = {} 
+        self.annId_dict = {}
+        self.im_dict = {}
+        self.licenses_dict = {}
+        for ann in coco['annotations']:           
+            self.annIm_dict[ann['image_id']].append(ann) 
+            self.annId_dict[ann['id']]=ann
+        for img in coco['images']:
+            self.im_dict[img['id']] = img
+        for cat in coco['categories']:
+            self.cat_dict[cat['id']] = cat
+        for license in coco['licenses']:
+            self.licenses_dict[license['id']] = license
+    def get_imgIds(self):
+        return list(self.im_dict.keys())
+    def get_annIds(self, im_ids):
+        im_ids=im_ids if isinstance(im_ids, list) else [im_ids]
+        return [ann['id'] for im_id in im_ids for ann in self.annIm_dict[im_id]]
+    def load_anns(self, ann_ids):
+        im_ids=ann_ids if isinstance(ann_ids, list) else [ann_ids]
+        return [self.annId_dict[ann_id] for ann_id in ann_ids]        
+    def load_cats(self, class_ids):
+        class_ids=class_ids if isinstance(class_ids, list) else [class_ids]
+        return [self.cat_dict[class_id] for class_id in class_ids]
+    def get_imgLicenses(self,im_ids):
+        im_ids=im_ids if isinstance(im_ids, list) else [im_ids]
+        lic_ids = [self.im_dict[im_id]["license"] for im_id in im_ids]
+        return [self.licenses_dict[lic_id] for lic_id in lic_ids]
