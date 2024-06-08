@@ -58,12 +58,6 @@ from collections import defaultdict
 import json
 from datetime import datetime
 
-# global IMAGE_PATH
-# global IMAGE_WIDTH
-# global IMAGE_HEIGHT
-# global IMAGE_CHANNELS
-# global category_index
-
 IMAGE_PATH = 'Yang Model Training/bee_imgs/bee_imgs/'
 IMAGE_WIDTH = 20
 IMAGE_HEIGHT = 40
@@ -466,3 +460,47 @@ info = {
         "url": str,
         "date_created": datetime,
         }
+
+def image_stats(image):
+    # compute the mean and standard deviation of each channel
+    (first, second, third) = cv2.split(image)
+    (firstMean, firstStd) = (first.mean(), first.std())
+    (secondMean, secondStd) = (second.mean(), second.std())
+    (thirdMean, thirdStd) = (third.mean(), third.std())
+    # return the color statistics
+    return (firstMean, firstStd, secondMean, secondStd, thirdMean, thirdStd)
+
+def brightness_match(src_img, tgt_img):
+    #convert both images to HSV
+    alpha = []
+    if tgt_img.shape[-1] == 4:
+        _, _, _, alpha = cv2.split(tgt_img)
+
+    source = cv2.cvtColor(np.array(src_img), cv2.COLOR_RGB2HSV).astype("float32")
+    target = cv2.cvtColor(np.array(tgt_img), cv2.COLOR_RGB2HSV).astype("float32")
+    
+    #Compute the mean and standard deviation of only the V channels for both the source and target images.
+    (hMeanSrc, hStdSrc, sMeanSrc, sStdSrc, vMeanSrc, vStdSrc) = image_stats(source)
+    (hMeanTar, hStdTar, sMeanTar, sStdTar, vMeanTar, vStdTar) = image_stats(target)
+    
+    #Subtract the mean of the target V channel from itself.
+    (h, s, v) = cv2.split(target)
+    v -= vMeanTar
+    
+    #Scale the target V by the ratio of the standard deviation of the target V divided by the standard deviation of the source V, multiplied by the target V.
+    v = (vStdTar / vStdSrc) * v * .5
+    
+    #Add the mean of the source V channel to the target V channel.
+    v += vMeanSrc
+    
+    #Clip any values that fall outside the range [0, 255].
+    v = np.clip(v, 0, 255)
+    
+    #Merge the target channels back together.
+    transfer = cv2.merge([h, s, v])
+    
+    #Convert target back to the RGB color space and return image
+    transfer = cv2.cvtColor(transfer.astype("uint8"), cv2.COLOR_HSV2RGB)
+    transfer = cv2.cvtColor(transfer.astype("uint8"), cv2.COLOR_RGB2RGBA)
+    transfer[:, :, 3] = alpha
+    return transfer
