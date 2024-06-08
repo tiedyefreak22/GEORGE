@@ -2,3 +2,4 @@
 *.gz filter=lfs diff=lfs merge=lfs -text
 *.tar.gz filter=lfs diff=lfs merge=lfs -text
 *.data-00000-of-00001 filter=lfs diff=lfs merge=lfs -text
+/Dataset/Custom_Dataset/*.png filter=lfs diff=lfs merge=lfs -text
