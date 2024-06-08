@@ -57,12 +57,13 @@ from keras.utils import to_categorical
 import warnings
 from collections import defaultdict
 import json
+from datetime import datetime
 
-global IMAGE_PATH
-global IMAGE_WIDTH
-global IMAGE_HEIGHT
-global IMAGE_CHANNELS
-global category_index
+# global IMAGE_PATH
+# global IMAGE_WIDTH
+# global IMAGE_HEIGHT
+# global IMAGE_CHANNELS
+# global category_index
 
 IMAGE_PATH = 'Yang Model Training/bee_imgs/bee_imgs/'
 IMAGE_WIDTH = 20
@@ -236,7 +237,7 @@ def process_image(new_image, BG_img):
     elif np.shape(new_image)[2] == 4:
         new_image = tf.reshape(new_image, (list(np.shape(new_image))[0],list(np.shape(new_image))[1],4))
     new_image = tf.keras.utils.array_to_img(new_image).convert('RGBA')
-    BG_img.paste(new_image, (y_offset, x_offset), new_image)
+    BG_img.paste(new_image, (x_offset, y_offset), new_image)
 
     coord_adder = [y_offset, x_offset, y_offset, x_offset]
     coords = np.array([sum(i) for i in zip(coords, coord_adder)])
@@ -367,3 +368,102 @@ class COCOParser:
         im_ids=im_ids if isinstance(im_ids, list) else [im_ids]
         lic_ids = [self.im_dict[im_id]["license"] for im_id in im_ids]
         return [self.licenses_dict[lic_id] for lic_id in lic_ids]
+
+'''
+{
+"info": info, "images": [image], "annotations": [annotation], "licenses": [license],
+}
+ 
+info{
+"year": int, "version": str, "description": str, "contributor": str, "url": str, "date_created": datetime,
+}
+ 
+image{
+"id": int, "width": int, "height": int, "file_name": str, "license": int, "flickr_url": str, "coco_url": str, "date_captured": datetime,
+}
+ 
+license{
+"id": int, "name": str, "url": str,
+}
+ 
+annotation{
+"id": int, "image_id": int, "category_id": int, "segmentation": RLE or [polygon], "area": float, "bbox": [x,y,width,height], "iscrowd": 0 or 1,
+}
+ 
+categories[{
+"id": int, "name": str, "supercategory": str,
+}]
+'''
+
+class img:
+    def __init__(self, img_id: int, width: int, height: int, file_name: str, license: int, flickr_url: str, coco_url: str, date_captured: str):
+        self.id = img_id
+        self.width = width
+        self.height = height
+        self.file_name = file_name
+        self.license = license
+        self.flickr_url = flickr_url
+        self.coco_url = coco_url
+        self.date_captured = date_captured
+    def toJSON(self):
+        return json.dumps(
+            self,
+            default=lambda o: o.__dict__, 
+            sort_keys=False,
+            indent=4)
+ 
+class license:
+    def __init__(self, lic_id: int, name: str, url: str):
+        self.id = lic_id
+        self.name = name
+        self.url = url
+    def toJSON(self):
+        return json.dumps(
+            self,
+            default=lambda o: o.__dict__, 
+            sort_keys=False,
+            indent=4)
+ 
+class bbox:
+    def __init__(self, x: int, y: int, width: int, height: int):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+ 
+class annotation:
+    def __init__(self, ann_id: int, image_id: int, category_id: int, segmentation, area: float, bbox: bbox, iscrowd: bool):
+        self.id = ann_id
+        self.image_id = image_id
+        self.category_id = category_id
+        self.segmentation = segmentation
+        self.area = area
+        self.bbox = list(vars(bbox).values())
+        self.iscrowd = iscrowd
+    def toJSON(self):
+        return json.dumps(
+            self,
+            default=lambda o: o.__dict__, 
+            sort_keys=False,
+            indent=4)
+ 
+class category:
+    def __init__(self, cat_id: int, name: str, supercategory: str):
+        self.id = cat_id
+        self.name = name
+        self.supercategory = supercategory
+    def toJSON(self):
+        return json.dumps(
+            self,
+            default=lambda o: o.__dict__, 
+            sort_keys=False,
+            indent=4)
+ 
+info = {
+        "year": int,
+        "version": str,
+        "description": str,
+        "contributor": str,
+        "url": str,
+        "date_created": datetime,
+        }
