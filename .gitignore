@@ -11,4 +11,4 @@ GEORGE_Model_Training2.ipynb
 sort_folder.py
 transfer_learning.ipynb
 transfer_learning_with_hub.ipynb
-Dataset/Custom_Dataset
+Dataset/Custom_Dataset/*

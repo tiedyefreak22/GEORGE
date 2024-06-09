@@ -504,3 +504,37 @@ def brightness_match(src_img, tgt_img):
     transfer = cv2.cvtColor(transfer.astype("uint8"), cv2.COLOR_RGB2RGBA)
     transfer[:, :, 3] = alpha
     return transfer
+
+def james_BG_remover(sel, target, thresh_val):
+    sel = np.array(sel)
+    #target = sel[0,0]
+    target = np.array(target)
+    m = np.shape(sel)[0]
+    n = np.shape(sel)[1]
+    
+    def make_palette(color,shape):
+        out = np.zeros(shape)
+        m = shape[0]
+        n = shape[1]
+        for i in range(m):
+            for j in range(n):
+                out[i,j,:] = color
+        return out.astype('uint8')
+    
+    def check_pixel(current, target, bound):
+        x = current.astype('int8')
+        t = target.astype('int8')
+        
+        if np.max(np.abs(x-t)) < bound:
+            return True
+        else:
+            return False
+    
+    for i in range(m):
+        for j in range(n):
+            if check_pixel(sel[i,j,:],target,thresh_val):
+                sel[i,j,3] = 0
+            else:
+                pass
+    return sel
+    
