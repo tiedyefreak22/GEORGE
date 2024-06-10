@@ -2,14 +2,5 @@
 **/*.ipynb_checkpoints/
 **/*.icloud/
 **/__pycache__
-Dataset/TrainAugmented.zip
-Dataset/ValAugmented.zip
 **/.ipynb_checkpoints
 #/Archive
-BeeDetection.py
-GEORGE_Model_Training2.ipynb
-sort_folder.py
-transfer_learning.ipynb
-transfer_learning_with_hub.ipynb
-/models
-/Dataset/Custom_Dataset
