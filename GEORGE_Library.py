@@ -31,10 +31,10 @@ from math import pi, ceil, floor
 import tensorflow as tf
 import tensorflow_datasets as tfds
 from tensorflow.keras import layers
-# from object_detection.utils import label_map_util
-# from object_detection.utils import config_util
-# from object_detection.utils import visualization_utils as viz_utils
-# from object_detection.builders import model_builder
+from object_detection.utils import label_map_util
+from object_detection.utils import config_util
+from object_detection.utils import visualization_utils as viz_utils
+from object_detection.builders import model_builder
 import pandas as pd
 import sys
 import skimage
