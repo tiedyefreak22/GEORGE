@@ -537,4 +537,8 @@ def james_BG_remover(sel, target, thresh_val):
             else:
                 pass
     return sel
+
+# Convert Coco bb to Pascal_Voc bb
+def coco_to_pascal_voc(x1, y1, w, h):
+    return [x1,y1, x1 + w, y1 + h]
     
