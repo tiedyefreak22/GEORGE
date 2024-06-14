@@ -338,7 +338,7 @@ class COCOParser:
         self.im_dict = {}
         self.licenses_dict = {}
         for ann in coco['annotations']:           
-            self.annIm_dict[ann['image_id']].append(ann) 
+            self.annIm_dict[ann['image_id']].append(ann)
             self.annId_dict[ann['id']]=ann
         for img in coco['images']:
             self.im_dict[img['id']] = img
@@ -361,6 +361,11 @@ class COCOParser:
         im_ids=im_ids if isinstance(im_ids, list) else [im_ids]
         lic_ids = [self.im_dict[im_id]["license"] for im_id in im_ids]
         return [self.licenses_dict[lic_id] for lic_id in lic_ids]
+    def get_wh(self, im_ids):
+        im_ids=im_ids if isinstance(im_ids, list) else [im_ids]
+        img_w = [self.im_dict[im_id]["width"] for im_id in im_ids]
+        img_h = [self.im_dict[im_id]["height"] for im_id in im_ids]
+        return img_w[0], img_h[0]
 
 '''
 {
@@ -540,5 +545,8 @@ def james_BG_remover(sel, target, thresh_val):
 
 # Convert Coco bb to Pascal_Voc bb
 def coco_to_pascal_voc(x1, y1, w, h):
-    return [x1,y1, x1 + w, y1 + h]
-    
+    return [x1, y1, x1 + w, y1 + h]
+
+# Convert Coco bb to relative xyxy
+def coco_to_rel_xyxy(x1, y1, w, h, img_w, img_h):
+    return [x1 / img_w, y1 / img_h, (x1 + w) / img_w, (y1 + h) / img_h]
