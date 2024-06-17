@@ -544,9 +544,19 @@ def james_BG_remover(sel, target, thresh_val):
     return sel
 
 # Convert Coco bb to Pascal_Voc bb
-def coco_to_pascal_voc(x1, y1, w, h):
-    return [x1, y1, x1 + w, y1 + h]
+def coco_to_pascal_voc(x, y, w, h):
+    return [x, y, x + w, y + h]
 
 # Convert Coco bb to relative xyxy
-def coco_to_rel_xyxy(x1, y1, w, h, img_w, img_h):
-    return [x1 / img_w, y1 / img_h, (x1 + w) / img_w, (y1 + h) / img_h]
+def coco_to_rel_xyxy(x, y, w, h, img_w, img_h):
+    return [x / img_w, y / img_h, (x + w) / img_w, (y + h) / img_h]
+
+def rel_xyxy_to_coco(x1, y1, x2, y2, img_w, img_h):
+    return [x1 * img_w, y1 * img_h, (x2 - x1) * img_w, (y2 - y1) * img_h]
+
+# Convert Coco bb to relative yxyx
+def coco_to_rel_yxyx(x, y, w, h, img_w, img_h):
+    return [y / img_h, x / img_w, (y + h) / img_h, (x + w) / img_w]
+
+def rel_yxyx_to_coco(x1, y1, x2, y2, img_w, img_h):
+    return [y1 * img_h, x1 * img_w, (y2 - y1) * img_h, (x2 - x1) * img_w]
