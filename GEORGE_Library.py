@@ -299,7 +299,7 @@ def get_model_train_step_function(model, optimizer, vars_to_fine_tune): # credit
     # Use tf.function for a bit of speed.
     # Comment out the tf.function decorator if you want the inside of the
     # function to run eagerly.
-    @tf.function
+    @tf.function(experimental_relax_shapes=True)
     def train_step_fn(image_tensors,
                     groundtruth_boxes_list,
                     groundtruth_classes_list):
