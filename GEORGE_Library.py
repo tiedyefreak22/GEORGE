@@ -57,6 +57,7 @@ from keras.utils import to_categorical
 from collections import defaultdict
 import json
 from datetime import datetime
+from keras_cv import bounding_box
 
 IMAGE_PATH = 'Yang Model Training/bee_imgs/bee_imgs/'
 IMAGE_WIDTH = 20
@@ -278,9 +279,18 @@ def prep_train_imgs(train_images_np, train_labels, gt_boxes):
     for (train_image_np, gt_box_np, train_label) in zip(train_images_np, gt_boxes, train_labels):
         train_image_tensors.append(tf.expand_dims(tf.convert_to_tensor(train_image_np, dtype=tf.float32), axis=0))
         gt_box_tensors.append(tf.convert_to_tensor(gt_box_np, dtype=tf.float32))
-        gt_classes_one_hot_tensors.append([train_label[1]])
-    gt_classes_one_hot_tensors = np.array(gt_classes_one_hot_tensors)
+        #gt_classes_one_hot_tensors.append([train_label[1]])
+        gt_classes_one_hot_tensors.append([train_label])
+    #gt_classes_one_hot_tensors = np.array(gt_classes_one_hot_tensors)
     return train_image_tensors, gt_box_tensors, gt_classes_one_hot_tensors
+
+def prep_train_imgs_only(train_images_np):
+    # Convert class labels to one-hot; convert everything to tensors.
+    train_image_tensors = []
+
+    for train_image_np in train_images_np:
+        train_image_tensors.append(tf.expand_dims(tf.convert_to_tensor(train_image_np, dtype=tf.float32), axis=0))
+    return train_image_tensors
 
 # Set up forward + backward pass for a single train step.
 def get_model_train_step_function(model, optimizer, vars_to_fine_tune): # credit: deeplearning.ai (https://github.com/https-deeplearning-ai)
@@ -357,7 +367,7 @@ class COCOParser:
     def load_cats(self, class_ids):
         class_ids=class_ids if isinstance(class_ids, list) else [class_ids]
         return [self.cat_dict[class_id] for class_id in class_ids]
-    def get_imgLicenses(self,im_ids):
+    def get_imgLicenses(self, im_ids):
         im_ids=im_ids if isinstance(im_ids, list) else [im_ids]
         lic_ids = [self.im_dict[im_id]["license"] for im_id in im_ids]
         return [self.licenses_dict[lic_id] for lic_id in lic_ids]
@@ -560,3 +570,27 @@ def coco_to_rel_yxyx(x, y, w, h, img_w, img_h):
 
 def rel_yxyx_to_coco(x1, y1, x2, y2, img_w, img_h):
     return [y1 * img_h, x1 * img_w, (y2 - y1) * img_h, (x2 - x1) * img_w]
+
+def load_image(filepath):
+    image_data = tf.io.read_file(filepath)
+    return tf.cast(tf.io.decode_png(image_data, channels=3), tf.float32)
+
+def visualize_dataset(inputs, value_range, rows, cols, bounding_box_format):
+    inputs = next(iter(inputs.take(1)))
+    images, bounding_boxes = inputs["images"], inputs["bounding_boxes"]
+    visualization.plot_bounding_box_gallery(
+        images.to_tensor(),
+        value_range=value_range,
+        rows=rows,
+        cols=cols,
+        y_true=bounding_boxes,
+        scale=10,
+        font_scale=0.7,
+        bounding_box_format=bounding_box_format,
+        class_mapping=class_mapping,
+    )
+
+def dict_to_tuple(inputs):
+    return inputs["images"], bounding_box.to_dense(
+        inputs["bounding_boxes"], max_boxes=32
+    )
