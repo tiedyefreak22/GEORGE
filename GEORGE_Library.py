@@ -594,3 +594,34 @@ def dict_to_tuple(inputs):
     return inputs["images"], bounding_box.to_dense(
         inputs["bounding_boxes"], max_boxes=32
     )
+
+def kalman(z):
+    # initial parameters
+    n_iter = len(z)
+    sz = (n_iter,)            # size of array
+    Q = 0.05                  # process variance
+
+    # allocate space for arrays
+    xhat = np.zeros(sz)       # a posteri estimate of x
+    P = np.zeros(sz)          # a posteri error estimate
+    xhatminus = np.zeros(sz)  # a priori estimate of x
+    Pminus = np.zeros(sz)     # a priori error estimate
+    K = np.zeros(sz)          # gain or blending factor
+
+    R = variance(z)           # estimate of measurement variance
+
+    # initial estimates
+    xhat[0] = mean(z[0:3])
+    P[0] = 1.0
+
+    for k in range(1, n_iter):
+        # time update
+        xhatminus[k] = xhat[k - 1]
+        Pminus[k] = P[k - 1] + Q
+
+        # measurement update
+        K[k] = Pminus[k] / (Pminus[k] + R)
+        xhat[k] = xhatminus[k] + K[k] * (z[k] - xhatminus[k])
+        P[k] = (1 - K[k]) * Pminus[k]
+
+    return xhat
