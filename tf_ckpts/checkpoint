@@ -1,4 +1,4 @@
-model_checkpoint_path: "ckpt-370"
-all_model_checkpoint_paths: "ckpt-370"
-all_model_checkpoint_timestamps: 1725028102.66578
+model_checkpoint_path: "ckpt-1237"
+all_model_checkpoint_paths: "ckpt-1237"
+all_model_checkpoint_timestamps: 1725368174.61436
 last_preserved_timestamp: 1724984792.1430998
