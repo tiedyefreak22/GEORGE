@@ -41,7 +41,7 @@ import skimage
 import skimage.io
 import skimage.transform
 from skimage import io, transform
-from statistics import mean
+from statistics import mean, variance
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
 from plotly import tools
@@ -595,11 +595,11 @@ def dict_to_tuple(inputs):
         inputs["bounding_boxes"], max_boxes=32
     )
 
-def kalman(z):
+def kalman(z, Q):
     # initial parameters
     n_iter = len(z)
     sz = (n_iter,)            # size of array
-    Q = 0.05                  # process variance
+    #Q = 0.005                # process variance
 
     # allocate space for arrays
     xhat = np.zeros(sz)       # a posteri estimate of x
