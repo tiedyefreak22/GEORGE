@@ -1,4 +1,4 @@
-model_checkpoint_path: "ckpt-6265"
-all_model_checkpoint_paths: "ckpt-6265"
-all_model_checkpoint_timestamps: 1726433830.8876529
+model_checkpoint_path: "ckpt-6254"
+all_model_checkpoint_paths: "ckpt-6254"
+all_model_checkpoint_timestamps: 1726437221.3974662
 last_preserved_timestamp: 1724984792.1430998
