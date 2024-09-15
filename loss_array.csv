@@ -6250,3 +6250,17 @@ loss,epoch,idx
 "tf.Tensor(0.42186117, shape=(), dtype=float32)",4,1561
 "tf.Tensor(0.4205099, shape=(), dtype=float32)",4,1562
 "tf.Tensor(0.41782248, shape=(), dtype=float32)",4,1563
+"tf.Tensor(0.40110543, shape=(), dtype=float32)",5,1
+"tf.Tensor(0.40899992, shape=(), dtype=float32)",5,2
+"tf.Tensor(0.40790445, shape=(), dtype=float32)",5,3
+"tf.Tensor(0.40021485, shape=(), dtype=float32)",5,4
+"tf.Tensor(0.42142195, shape=(), dtype=float32)",5,5
+"tf.Tensor(0.4531183, shape=(), dtype=float32)",5,6
+"tf.Tensor(0.39423192, shape=(), dtype=float32)",5,7
+"tf.Tensor(0.4014792, shape=(), dtype=float32)",5,8
+"tf.Tensor(0.3963732, shape=(), dtype=float32)",5,9
+"tf.Tensor(0.39180383, shape=(), dtype=float32)",5,10
+"tf.Tensor(0.40211505, shape=(), dtype=float32)",5,11
+"tf.Tensor(0.43723375, shape=(), dtype=float32)",5,12
+"tf.Tensor(0.3931741, shape=(), dtype=float32)",5,13
+"tf.Tensor(0.41851702, shape=(), dtype=float32)",5,14
