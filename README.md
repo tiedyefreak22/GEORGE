@@ -33,3 +33,5 @@ There are several quality datasets available online for training neural networks
 [^4]: https://www.tensorflow.org/datasets/catalog/bee_dataset
 
 Final, in situ testing of GEORGE will unfortunately need to wait until next spring when honeybees reemerge from their winter hibernation. However, the network will be trained and the final Tensorflow model will be converted into at Tensorflow lite (tflite) model for loading onto the Raspberry Pi. The tflite format should allow for the model to run more efficiently on the limited hardware of the Raspberry Pi.
+
+The GEORGE datasets created for training, validation, etc. can be found at this [link](https://www.kaggle.com/datasets/kevinhardin/george-augmented-dataset).

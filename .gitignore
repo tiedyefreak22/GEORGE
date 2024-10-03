@@ -1,8 +1,5 @@
 **/.DS_Store
 **/*.ipynb_checkpoints/
 **/*.icloud/
-**/__pycache__
-**/.ipynb_checkpoints
-#/Archive
-/Dataset/Custom_Dataset.zip
-/Dataset/Custom_Dataset/*
+**/*__pycache__
+/Dataset/*
