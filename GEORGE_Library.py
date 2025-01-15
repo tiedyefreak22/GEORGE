@@ -60,6 +60,7 @@ from datetime import datetime
 from keras_cv import bounding_box
 import re
 from tensorflow import keras
+from copy import deepcopy
 
 IMAGE_PATH = 'Yang Model Training/bee_imgs/bee_imgs/'
 IMAGE_WIDTH = 20
@@ -1322,3 +1323,122 @@ def prepare_image(image):
     image, _, ratio = resize_and_pad_image(image, jitter=None)
     image = tf.keras.applications.resnet.preprocess_input(image)
     return tf.expand_dims(image, axis=0), ratio
+
+def magic_wand(image, reference, tolerance, contiguous = True):
+    '''
+    A function similar to Photoshop's "magic wand" tool, used to select
+    pixels with similar values
+    
+    ***Inputs***
+    image:      RGB or RGBA image array
+    reference:  either a 2 or 3 number tuple containing a pixel location 
+                or a pixel value, respectively
+    tolerance:  integer value defining the +/- range for acceptable pixel values
+    contiguous: boolean value defining whether to only return contigous pixels
+
+    ***Outputs***
+    mask:       Returns a 1-dimensional numpy array uint8 mask of contiguous or non-contiguous
+                pixels with R, G, B values that fall within the +/- tolerance range
+    '''
+    def bound(value):
+        return max(0, min(255, value))
+    
+    def get_adjacent(ref_number):
+        adjacent_nums = []
+        adjacent_nums.append((ref_number[0] - 1, ref_number[1]))
+        adjacent_nums.append((ref_number[0] + 1, ref_number[1]))
+        adjacent_nums.append((ref_number[0] - 1, ref_number[1] - 1))
+        adjacent_nums.append((ref_number[0], ref_number[1] - 1))
+        adjacent_nums.append((ref_number[0] + 1, ref_number[1] - 1))
+        adjacent_nums.append((ref_number[0] - 1, ref_number[1] + 1))
+        adjacent_nums.append((ref_number[0], ref_number[1] + 1))
+        adjacent_nums.append((ref_number[0] + 1, ref_number[1] + 1))
+        return adjacent_nums
+        
+    def mark_adjacent(ref_number):
+        adjacent_nums = get_adjacent(ref_number) # get references of adjacent pixels
+        for adjacent_num in adjacent_nums:
+            if (np.array(adjacent_num) >= 0).all() and (np.array(adjacent_num) < im.shape[:2]).all(): # in-bounds check
+                current_ref_pixel = im[adjacent_num[0], adjacent_num[1], :3]
+                if (current_ref_pixel > [bound(i - tolerance) for i in ref_pixel]).all() and (current_ref_pixel < [bound(i + tolerance) for i in ref_pixel]).all(): # in-tolerance and between 0 & 255 check
+                    mask[adjacent_num] = 0
+
+    ref_number = ()
+    ref_pixel = ()
+    im = np.array(deepcopy(image).astype('uint8'))
+    ref_pixel_tol = 0
+    
+    while ref_number == ():
+        if len(reference) > 2: # pixel value provided
+            ref_pixel = reference
+            for i in range(im.shape[0]):
+                for j in range(im.shape[1]):
+                    current_ref_pixel = im[i, j, :3]
+                    if (current_ref_pixel > [bound(i - ref_pixel_tol) for i in ref_pixel]).all() and (current_ref_pixel < [bound(i + ref_pixel_tol) for i in ref_pixel]).all():
+                        ref_number = (i, j) # get and store pixel location with reference pixel value
+                        break
+                    if (i == range(im.shape[0])) and (j == range(im.shape[1])):
+                        raise Exception("No pixels match provided reference")
+                else:
+                    continue
+                break
+                        
+        elif len(reference) == 2: # pixel location provided
+            ref_number = reference
+            ref_pixel = im[ref_number[0], ref_number[1], :3] # get and store reference pixel value
+        else:
+            raise Exception("Cannot parse provided reference")
+        ref_pixel_tol = ref_pixel_tol + 1
+
+    if contiguous:
+        mask = np.ones_like(im[:, :, 0]) # make an array of zeros in the shape of one of the color channels of the original im
+        mask[ref_number[0], ref_number[1]] = 0 # mark the starting pixel as 1
+        # Top
+        i = 0
+        while ref_number[0] - i > 0:
+            j = 0
+            while ref_number[1] - j > 0:
+                if mask[ref_number[0] - i, ref_number[1] - j] == 0:
+                    mark_adjacent((ref_number[0] - i, ref_number[1] - j))
+                j = j + 1
+            j = 0
+            while ref_number[1] + j < im.shape[1]:
+                if mask[ref_number[0] - i, ref_number[1] + j] == 0:
+                    mark_adjacent((ref_number[0] - i, ref_number[1] + j))
+                j = j + 1
+            i = i + 1
+    
+        # Bottom
+        i = 0
+        while ref_number[0] + i < im.shape[0]:
+            j = 0
+            while ref_number[1] - j > 0:
+                if mask[ref_number[0] + i, ref_number[1] - j] == 0:
+                    mark_adjacent((ref_number[0] + i, ref_number[1] - j))
+                j = j + 1
+            j = 0
+            while ref_number[1] + j < im.shape[1]:
+                if mask[ref_number[0] + i, ref_number[1] + j] == 0:
+                    mark_adjacent((ref_number[0] + i, ref_number[1] + j))
+                j = j + 1
+            i = i + 1
+                
+        return mask
+    else:
+        mask = np.ones_like(im[:, :, 0]) # make an array of zeros in the shape of one of the color channels of the original im
+        
+        for i in range(im.shape[0]):
+            for j in range(im.shape[1]):
+                current_ref_pixel = im[i, j, :3]
+                if (current_ref_pixel > [bound(i - tolerance) for i in ref_pixel]).all() and (current_ref_pixel < [bound(i + tolerance) for i in ref_pixel]).all(): # in-tolerance and between 0 & 255 check
+                    mask[i, j] = 0
+        return mask
+
+def get_row_view(a):
+    void_dt = np.dtype((np.void, a.dtype.itemsize * np.prod(a.shape[-1])))
+    a = np.ascontiguousarray(a)
+    return a.reshape(-1, a.shape[-1]).view(void_dt).ravel()
+    
+def get_mode(img):
+    unq, idx, count = np.unique(get_row_view(img), return_index=1, return_counts=1)
+    return img.reshape(-1,img.shape[-1])[idx[count.argmax()]]
