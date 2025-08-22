@@ -22,7 +22,7 @@ tuning = Picamera2.load_tuning_file("/usr/share/libcamera/ipa/rpi/vc4/imx708_noi
 camera = Picamera2(tuning=tuning)
 os.system("v4l2-ctl --set-ctrl wide_dynamic_range=1 -d /dev/v4l-subdev0")
 capture_config = camera.create_still_configuration(main = {"size": (1920,1080)})
-reference = cv2.imread('focus_target.png') # reference image
+reference = cv2.imread('focus_target/focus_target.png') # reference image
 
 def get_centroid(vertices):
     x = [vertex[0] for vertex in vertices]
