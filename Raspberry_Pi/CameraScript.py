@@ -70,7 +70,7 @@ def return_focus_target_window(reference, image):
             break
     #plt.figure(figsize = (20,20))
     #plt.imshow(img3),plt.show()
-    hull = ConvexHull([(i[0], i[1]) for i in points])
+    hull = ConvexHull([(i[0], i[1]) for i in points], qhull_options = 'QJ')
     hull_vertices = []
     for i in range(len(hull.vertices)):
         hull_vertices.append((points[hull.vertices[i]][0], points[hull.vertices[i]][1]))
