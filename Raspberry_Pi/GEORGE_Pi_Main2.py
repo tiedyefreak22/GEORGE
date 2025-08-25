@@ -83,5 +83,5 @@ while True:
                 draw_bounding_boxes_on_image(new_image, np.asarray(bboxes), display_str_list_list = list(zip([category_index[class_id]["name"] for class_id in np.asarray(class_ids)], [str(i) for i in scores])))
                 new_image.save("Images/detections" + current_datetime.strftime("_%y-%m-%d_%H_%M_%S") + ".png")
             else:
-                print("No detections")
+                print("No detections %i/3" % (i + 1))
         print("Inference Time: %f" % (time() - start_time))
