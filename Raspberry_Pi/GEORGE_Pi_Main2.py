@@ -16,7 +16,6 @@ import numpy as np
 import tensorflow as tf
 from pathlib import Path
 from GEORGE_Library import *
-%matplotlib inline
 
 label_id_offset = 1
 score_threshold = 0.4
@@ -25,7 +24,7 @@ model_directory = "/home/kevinhardin/Documents/GEORGE"
 # model_directory = "/Users/kevinhardin/Documents/GitHub/GEORGE"
 model_name = 'extract_superimp_model'
 model_dest = os.path.join(os.sep, model_directory, model_name)
-
+print("Loading model...")
 new_model = tf.saved_model.load(model_dest)
 
 while True:
@@ -48,7 +47,7 @@ while True:
             df.to_csv(csv_data_file_path, index = False)
         
         im = Image.open(current_filename)
-        
+        start_time = time()
         for i in range(3):
             image = np.array(im).astype('uint8')[220:-220, (640 * i):(640 * (i + 1)), :]
         
@@ -83,3 +82,6 @@ while True:
                 new_image = Image.fromarray(image)
                 draw_bounding_boxes_on_image(new_image, np.asarray(bboxes), display_str_list_list = list(zip([category_index[class_id]["name"] for class_id in np.asarray(class_ids)], [str(i) for i in scores])))
                 new_image.save("Images/detections" + current_datetime.strftime("_%y-%m-%d_%H_%M_%S") + ".png")
+            else:
+                print("No detections")
+        print("Inference Time: %f" % (time() - start_time))
