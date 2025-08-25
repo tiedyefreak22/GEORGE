@@ -73,8 +73,13 @@ while True:
             if not scores == []:        
                 for category, score in zip([category_index[class_id]["name"] for class_id in np.asarray(class_ids)], scores):
                     data_new = {'datetime': current_datetime.strftime("%y-%m-%d_%H_%M_%S"), 'category': category, 'score': score}
-                    print(data_new)
+                    print("Detection! Time: %s, Category: %s, Score: %s" % (str(data_new["datetime"]), str(data_new["category"]), str(data_new["score"])))
                     df_new = pd.DataFrame([data_new])
                 
                     # Append the new data to the existing CSV
                     df_new.to_csv(csv_data_file_path, mode='a', header=False, index=False)
+
+                fig, ax = plt.subplots()
+                new_image = Image.fromarray(image)
+                draw_bounding_boxes_on_image(new_image, np.asarray(bboxes), display_str_list_list = list(zip([category_index[class_id]["name"] for class_id in np.asarray(class_ids)], [str(i) for i in scores])))
+                new_image.save("Images/detections" + current_datetime.strftime("_%y-%m-%d_%H_%M_%S") + ".png")
