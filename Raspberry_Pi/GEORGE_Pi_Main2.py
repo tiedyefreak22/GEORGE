@@ -73,6 +73,7 @@ while True:
             if not scores == []:        
                 for category, score in zip([category_index[class_id]["name"] for class_id in np.asarray(class_ids)], scores):
                     data_new = {'datetime': current_datetime.strftime("%y-%m-%d_%H_%M_%S"), 'category': category, 'score': score}
+                    print(data_new)
                     df_new = pd.DataFrame([data_new])
                 
                     # Append the new data to the existing CSV
