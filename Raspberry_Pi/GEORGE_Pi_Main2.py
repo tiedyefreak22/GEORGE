@@ -30,7 +30,8 @@ new_model = tf.saved_model.load(model_dest)
 while True:
     current_datetime = datetime.now()
     current_hour = int(current_datetime.strftime("%H"))
-    if 8 <= current_hour <= 18:
+    # if 8 <= current_hour <= 18:
+    if 0 <= current_hour <= 24:
         for item in os.listdir("tmp"):
             item_path = os.path.join("tmp", item)
             if os.path.isfile(item_path):
@@ -75,7 +76,7 @@ while True:
             if not scores == []:        
                 for category, score in zip([category_index[class_id]["name"] for class_id in np.asarray(class_ids)], scores):
                     data_new = {'datetime': current_datetime.strftime("%y-%m-%d_%H_%M_%S"), 'category': category, 'score': score}
-                    print("Detection! Time: %s, Category: %s, Score: %s" % (str(data_new["datetime"]), str(data_new["category"]), str(data_new["score"])))
+                    print("Detection! %i/3, Time: %s, Category: %s, Score: %s" % (i + 1, str(data_new["datetime"]), str(data_new["category"]), str(data_new["score"])))
                     df_new = pd.DataFrame([data_new])
                 
                     # Append the new data to the existing CSV
