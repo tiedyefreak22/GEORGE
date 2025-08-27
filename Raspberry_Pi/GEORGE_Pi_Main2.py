@@ -38,7 +38,10 @@ while True:
                 
         current_filename = "tmp/image" + current_datetime.strftime("_%y-%m-%d_%H_%M_%S") + ".png"
         im, _, _ = takePic()
-        im.save(current_filename)
+        im = automatic_brightness_and_contrast(np.array(im).astype('uint8'))
+        im = automatic_saturation(im)
+        im = automatic_tint(im)
+        Image.fromarray(im).save(current_filename)
 
         csv_data_file_path = "GEORGE_data.csv"
         if glob.glob(csv_data_file_path) == []:
@@ -78,10 +81,9 @@ while True:
                     # Append the new data to the existing CSV
                     df_new.to_csv(csv_data_file_path, mode='a', header=False, index=False)
 
-                fig, ax = plt.subplots()
                 new_image = Image.fromarray(image)
                 draw_bounding_boxes_on_image(new_image, np.asarray(bboxes), display_str_list_list = list(zip([category_index[class_id]["name"] for class_id in np.asarray(class_ids)], [str(i) for i in scores])))
-                new_image.save("Images/detections" + current_datetime.strftime("_%y-%m-%d_%H_%M_%S") + ".png")
+                new_image.save("Images/detections" + current_datetime.strftime("_%y-%m-%d_%H_%M_%S") + "_" + str(i) + ".png")
             else:
                 print("No detections %i/3" % (i + 1))
         print("Inference Time: %f" % (time() - start_time))
