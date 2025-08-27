@@ -244,6 +244,15 @@ def process_image(new_image, BG_img):
 
 # Automatic brightness and contrast optimization with optional histogram clipping
 def automatic_brightness_and_contrast(image):
+    """
+    Adjusts the brightness and contrast of an image automatically.
+ 
+    Args:
+        img (np.array): The input image (e.g., loaded by cv2.imread).
+ 
+    Returns:
+        np.array: The brightness/contrast-adjusted image.
+    """
     alow = image.min()
     ahigh = image.max()
     amax = 255
@@ -255,6 +264,66 @@ def automatic_brightness_and_contrast(image):
     # perform the operation g(x,y)= α * f(x,y)+ β
     auto_result = cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
     return (np.array(auto_result).astype('uint8'))#, alpha, beta)
+
+def automatic_saturation(img):
+    """
+    Adjusts the saturation of an image automatically.
+ 
+    Args:
+        img (np.array): The input image (e.g., loaded by cv2.imread).
+ 
+    Returns:
+        np.array: The saturation-adjusted image.
+    """
+    # Convert from BGR to HSV color space
+    hsv_img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+ 
+    # Split the HSV channels
+    h, s, v = cv2.split(hsv_img)
+ 
+    # Calculate the average saturation value to determine the baseline
+    avg_s = np.mean(s)
+   
+    # Calculate a saturation multiplier based on the average saturation
+    # If the image is already very saturated, a smaller adjustment is made.
+    # The autosaturation effect comes from making a larger adjustment
+    # to images with a lower average saturation.
+    auto_factor =  1 - (avg_s / 255.0) + 1
+ 
+    # Scale the saturation channel
+    s = s.astype(np.float32) * auto_factor
+    s = np.clip(s, 0, 255).astype(np.uint8)
+ 
+    # Merge the channels back and convert to BGR
+    final_hsv = cv2.merge([h, s, v])
+    return cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR)
+ 
+def automatic_tint(img):
+    """
+    Adjusts the tint of an image automatically.
+ 
+    Args:
+        img (np.array): The input image (e.g., loaded by cv2.imread).
+ 
+    Returns:
+        np.array: The tint-adjusted image.
+    """
+ 
+    # Simple white balancing (adjusting based on channel means)
+    # This is a very basic approach and might not always be optimal
+    b, g, r = cv2.split(img)
+    avg_b, avg_g, avg_r = np.mean(b), np.mean(g), np.mean(r)
+    avg_total = (avg_b + avg_g + avg_r) / 3
+ 
+    corrected_b = b * (avg_total / avg_b)
+    corrected_g = g * (avg_total / avg_g)
+    corrected_r = r * (avg_total / avg_r)
+ 
+    final_corrected_img = cv2.merge([corrected_b.astype(np.uint8),
+                                      corrected_g.astype(np.uint8),
+                                      corrected_r.astype(np.uint8)])
+ 
+    return final_corrected_img
 
 def get_file_and_info(filename):
     temp_label = np.zeros(5)
