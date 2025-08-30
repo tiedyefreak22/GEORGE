@@ -29,14 +29,15 @@ from tqdm import tqdm
 import math
 from math import pi, ceil, floor
 import tensorflow as tf
-# import tensorflow_datasets as tfds
-# from tensorflow.keras import layers
-# from object_detection.utils import label_map_util
-# from object_detection.utils import config_util
-# from object_detection.utils import visualization_utils as viz_utils
-# from object_detection.builders import model_builder
-import pandas as pd
 import sys
+if sys.platform = "win32":
+    import tensorflow_datasets as tfds
+    from tensorflow.keras import layers
+    from object_detection.utils import label_map_util
+    from object_detection.utils import config_util
+    from object_detection.utils import visualization_utils as viz_utils
+    from object_detection.builders import model_builder
+import pandas as pd
 import skimage
 import skimage.io
 import skimage.transform
@@ -61,6 +62,8 @@ from keras_cv import bounding_box
 import re
 from tensorflow import keras
 from copy import deepcopy
+import warnings
+warnings.filterwarnings('ignore')
 
 IMAGE_PATH = 'Yang Model Training/bee_imgs/bee_imgs/'
 IMAGE_WIDTH = 20
@@ -112,8 +115,8 @@ def get_label(label):
     trans_label = np.array(int(np.sum(trans_label)))
     return list(category_index.values())[trans_label], tf.one_hot(trans_label, 4), [trans_label + 1]
 
-def zoom_image (new_image):
-    DataGen = tf.keras.Sequential([layers.RandomZoom(0.1, 0.1)])
+def zoom_image (new_image, zoom_factor):
+    DataGen = tf.keras.Sequential([layers.RandomZoom(zoom_factor, zoom_factor)])
     new_image = tf.cast(np.array(new_image), tf.float32)
     new_image = DataGen(new_image)
     return np.array(new_image).astype('uint8')
