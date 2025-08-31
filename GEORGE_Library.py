@@ -30,7 +30,7 @@ import math
 from math import pi, ceil, floor
 import tensorflow as tf
 import sys
-if sys.platform = "win32":
+if sys.platform == "win32":
     import tensorflow_datasets as tfds
     from tensorflow.keras import layers
     from object_detection.utils import label_map_util
@@ -1625,3 +1625,21 @@ def draw_bounding_boxes_on_image(image,
       display_str_list = display_str_list_list[i]
     draw_bounding_box_on_image(image, boxes[i, 0], boxes[i, 1], boxes[i, 2],
                                boxes[i, 3], color, thickness, display_str_list)
+
+def random_motion_blur(image, angle = None, length = None):
+    if angle is None:
+        angle = random.uniform(0, 360) # Random angle in degrees
+    if length is None:
+        length = random.randint(10, 30) # Random blur length (adjust as needed)
+    
+    # create the kernel
+    kernel = np.zeros((length, length), dtype=np.float32)
+    center = length // 2
+    cv2.line(kernel, (0, center), (length - 1, center), 1, 1) # Horizontal line
+    M = cv2.getRotationMatrix2D((center, center), angle, 1)
+    kernel = cv2.warpAffine(kernel, M, (length, length))
+    kernel /= np.sum(kernel) # Normalize the kernel
+
+    # apply the blur
+    blurred_image = cv2.filter2D(image, -1, kernel)
+    return blurred_image
