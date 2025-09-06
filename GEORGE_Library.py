@@ -1630,16 +1630,19 @@ def random_motion_blur(image, angle = None, length = None):
     if angle is None:
         angle = random.uniform(0, 360) # Random angle in degrees
     if length is None:
-        length = random.randint(10, 30) # Random blur length (adjust as needed)
-    
-    # create the kernel
-    kernel = np.zeros((length, length), dtype=np.float32)
-    center = length // 2
-    cv2.line(kernel, (0, center), (length - 1, center), 1, 1) # Horizontal line
-    M = cv2.getRotationMatrix2D((center, center), angle, 1)
-    kernel = cv2.warpAffine(kernel, M, (length, length))
-    kernel /= np.sum(kernel) # Normalize the kernel
+        length = random.randint(0, 20) # Random blur length (adjust as needed)
 
-    # apply the blur
-    blurred_image = cv2.filter2D(image, -1, kernel)
-    return blurred_image
+    if length != 0:
+        # create the kernel
+        kernel = np.zeros((length, length), dtype=np.float32)
+        center = length // 2
+        cv2.line(kernel, (0, center), (length - 1, center), 1, 1) # Horizontal line
+        M = cv2.getRotationMatrix2D((center, center), angle, 1)
+        kernel = cv2.warpAffine(kernel, M, (length, length))
+        kernel /= np.sum(kernel) # Normalize the kernel
+    
+        # apply the blur
+        blurred_image = cv2.filter2D(image, -1, kernel)
+        return blurred_image
+    else:
+        return image
