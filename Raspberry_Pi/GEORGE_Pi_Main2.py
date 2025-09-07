@@ -2,26 +2,18 @@ import sys
 sys.path.append("/home/kevinhardin/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games")
 sys.path.append("CameraScript")
 sys.path.append("/home/kevinhardin/Documents/GEORGE")
-# sys.path.append("/Users/kevinhardin/Documents/GitHub/GEORGE")
+if sys.platform == "win32":
+    sys.path.append("/Users/kevinhardin/Documents/GitHub/GEORGE")
 from CameraScript import takePic
-from time import sleep, time
-from datetime import datetime, date
-import os
-os.environ["LIBCAMERA_LOG_LEVELS"] = "2"
-import warnings
-warnings.filterwarnings('ignore')
-import matplotlib.pyplot as plt
-import glob
-import numpy as np
-import tensorflow as tf
-from pathlib import Path
 from GEORGE_Library import *
+os.environ["LIBCAMERA_LOG_LEVELS"] = "2"
 
 label_id_offset = 1
 score_threshold = 0.4
 category_index = {1: {'id': 1, 'name': 'regular'}, 2: {'id': 2, 'name': 'pollen'}, 3: {'id': 3, 'name': 'varroa'}, 4: {'id': 4, 'name': 'wasps'}}
 model_directory = "/home/kevinhardin/Documents/GEORGE"
-# model_directory = "/Users/kevinhardin/Documents/GitHub/GEORGE"
+if sys.platform == "win32":
+    model_directory = "/Users/kevinhardin/Documents/GitHub/GEORGE"
 model_name = 'extract_superimp_model'
 model_dest = os.path.join(os.sep, model_directory, model_name)
 print("Loading model...")

@@ -5,31 +5,67 @@ Neural-net-powered honeybee hive-mounted pollen, varroa, and wasp counter
 #========================================================================
 '''
 
-import PIL
-import random
-from sklearn.cluster import DBSCAN
-from scipy.spatial import ConvexHull, convex_hull_plot_2d
-from scipy import ndimage as ndi
-import os
-import pathlib
-import matplotlib
-from matplotlib import cm
-import matplotlib.pyplot as plt
-import random
-import io
-import imageio
-import glob
-import cv2
-import numpy as np
-from six import BytesIO
-from PIL import Image, ImageDraw, ImageFont
+from collections import defaultdict
+from copy import deepcopy
+from datetime import datetime
+from datetime import datetime, date
 from IPython.display import display, Javascript
 from IPython.display import Image as IPyImage
-from tqdm import tqdm
-import math
+from keras import optimizers
+from keras.callbacks import ModelCheckpoint, Callback, EarlyStopping, ReduceLROnPlateau, LearningRateScheduler
+from keras.layers import Dense, Conv2D, Flatten, MaxPool2D, Dropout, BatchNormalization,LeakyReLU
+from keras.models import Sequential
+from keras.utils import to_categorical
+from keras_cv import bounding_box
+from math import ceil
 from math import pi, ceil, floor
-import tensorflow as tf
+from matplotlib import cm
+from mpl_toolkits.axes_grid1 import host_subplot
+from object_detection.builders import model_builder
+from object_detection.utils import config_util
+from pathlib import Path
+from PIL import Image, ImageDraw, ImageFont
+from plotly import tools
+from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
+from scipy import ndimage as ndi
+from scipy.spatial import ConvexHull, convex_hull_plot_2d
+from six import BytesIO
+from skimage import io, transform
+from sklearn import metrics
+from sklearn.cluster import DBSCAN
+from sklearn.model_selection import train_test_split
+from statistics import mean, variance
+from tensorflow import keras
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from time import sleep, time
+from tqdm import tqdm
+import cv2
+import glob
+import imageio
+import io
+import json
+import math
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+import mpl_toolkits.axisartist as AA
+import numpy as np
+import os
+import pandas as pd
+import pathlib
+import PIL
+import plotly.figure_factory as ff
+import plotly.graph_objs as go
+import random
+import re
+import signal
+import skimage
+import skimage.io
+import skimage.transform
 import sys
+import tensorflow as tf
+import warnings
+warnings.filterwarnings('ignore')
 if sys.platform == "win32":
     import tensorflow_datasets as tfds
     from tensorflow.keras import layers
@@ -37,33 +73,6 @@ if sys.platform == "win32":
     from object_detection.utils import config_util
     from object_detection.utils import visualization_utils as viz_utils
     from object_detection.builders import model_builder
-import pandas as pd
-import skimage
-import skimage.io
-import skimage.transform
-from skimage import io, transform
-from statistics import mean, variance
-import plotly.graph_objs as go
-import plotly.figure_factory as ff
-from plotly import tools
-from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
-from sklearn.model_selection import train_test_split
-from sklearn import metrics
-from keras import optimizers
-from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Flatten, MaxPool2D, Dropout, BatchNormalization,LeakyReLU
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from keras.callbacks import ModelCheckpoint, Callback, EarlyStopping, ReduceLROnPlateau, LearningRateScheduler
-from keras.utils import to_categorical
-from collections import defaultdict
-import json
-from datetime import datetime
-from keras_cv import bounding_box
-import re
-from tensorflow import keras
-from copy import deepcopy
-import warnings
-warnings.filterwarnings('ignore')
 
 IMAGE_PATH = 'Yang Model Training/bee_imgs/bee_imgs/'
 IMAGE_WIDTH = 20
