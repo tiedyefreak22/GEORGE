@@ -617,7 +617,7 @@ def james_BG_remover(sel, target, thresh_val):
         n = shape[1]
         for i in range(m):
             for j in range(n):
-                out[i,j,:] = color
+                out[i, j, :] = color
         return out.astype('uint8')
     
     def check_pixel(current, target, bound):
@@ -632,7 +632,7 @@ def james_BG_remover(sel, target, thresh_val):
     for i in range(m):
         for j in range(n):
             if check_pixel(sel[i,j,:],target,thresh_val):
-                sel[i,j,3] = 0
+                sel[i, j, 3] = 0
             else:
                 pass
     return sel
@@ -664,19 +664,19 @@ def visualize_dataset(inputs, value_range, rows, cols, bounding_box_format):
     images, bounding_boxes = inputs["images"], inputs["bounding_boxes"]
     visualization.plot_bounding_box_gallery(
         images.to_tensor(),
-        value_range=value_range,
-        rows=rows,
-        cols=cols,
-        y_true=bounding_boxes,
-        scale=10,
-        font_scale=0.7,
-        bounding_box_format=bounding_box_format,
-        class_mapping=class_mapping,
+        value_range = value_range,
+        rows = rows,
+        cols = cols,
+        y_true = bounding_boxes,
+        scale = 10,
+        font_scale = 0.7,
+        bounding_box_format = bounding_box_format,
+        class_mapping = class_mapping,
     )
 
 def dict_to_tuple(inputs):
     return inputs["images"], bounding_box.to_dense(
-        inputs["bounding_boxes"], max_boxes=32
+        inputs["bounding_boxes"], max_boxes = 32
     )
 
 def kalman(z, Q):
@@ -809,11 +809,11 @@ def compute_iou(boxes1, boxes2):
 
 
 def visualize_detections(
-    image, boxes, classes, scores, figsize=(7, 7), linewidth=1, color=[0, 0, 1]
+    image, boxes, classes, scores, figsize = (7, 7), linewidth = 1, color = [0, 0, 1]
 ):
     """Visualize Detections"""
-    image = np.array(image, dtype=np.uint8)
-    plt.figure(figsize=figsize)
+    image = np.array(image, dtype = np.uint8)
+    plt.figure(figsize = figsize)
     plt.axis("off")
     plt.imshow(image)
     ax = plt.gca()
@@ -822,7 +822,7 @@ def visualize_detections(
         x1, y1, x2, y2 = box
         w, h = x2 - x1, y2 - y1
         patch = plt.Rectangle(
-            [x1, y1], w, h, fill=False, edgecolor=color, linewidth=linewidth
+            [x1, y1], w, h, fill = False, edgecolor = color, linewidth = linewidth
         )
         ax.add_patch(patch)
         ax.text(
@@ -830,8 +830,8 @@ def visualize_detections(
             y1,
             text,
             bbox={"facecolor": color, "alpha": 0.4},
-            clip_box=ax.clipbox,
-            clip_on=True,
+            clip_box = ax.clipbox,
+            clip_on = True,
         )
     plt.show()
     return ax
@@ -1639,7 +1639,7 @@ def random_motion_blur(image, angle = None, length = None):
     if angle is None:
         angle = random.uniform(0, 360) # Random angle in degrees
     if length is None:
-        length = random.randint(0, 20) # Random blur length (adjust as needed)
+        length = random.randint(0, 10) # Random blur length (adjust as needed)
 
     if length != 0:
         # create the kernel
