@@ -1,4 +1,6 @@
 Dataset/Custom_Dataset/Train/*
+Dataset/Custom_Dataset/Test/*
+Dataset/Custom_Dataset/Validation/*
 # */Archive/*
 
 ### JupyterNotebooks ###
