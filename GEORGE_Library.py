@@ -1655,3 +1655,21 @@ def random_motion_blur(image, angle = None, length = None):
         return blurred_image
     else:
         return image
+
+@tf.function(input_signature=[tf.TensorSpec(shape=[None,640,640,3], dtype=tf.float32)])
+def detect(input_tensor): # credit: deeplearning.ai (https://github.com/https-deeplearning-ai)
+    """Run detection on an input image.
+
+    Args:
+    input_tensor: A [1, height, width, 3] Tensor of type tf.float32.
+      Note that height and width can be anything since the image will be
+      immediately resized according to the needs of the model within this
+      function.
+
+    Returns:
+    A dict containing 3 Tensors (`detection_boxes`, `detection_classes`,
+      and `detection_scores`).
+    """
+    preprocessed_image, shapes = detection_model.preprocess(input_tensor)
+    prediction_dict = detection_model.predict(preprocessed_image, shapes)
+    return detection_model.postprocess(prediction_dict, shapes)
