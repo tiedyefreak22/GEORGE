@@ -1,1 +1,1 @@
-{"batch": 11652, "epoch": 2}
+{"batch": 530, "epoch": 3}
